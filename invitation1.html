@@ -12,7 +12,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getDatabase, ref, set, get, update, onValue, onDisconnect, serverTimestamp, push
+  getDatabase, ref, set, get, update, remove, onValue, onDisconnect, serverTimestamp, push
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import {
   getAuth, signInAnonymously, onAuthStateChanged
@@ -33,7 +33,7 @@ const app  = initializeApp(firebaseConfig);
 const db   = getDatabase(app);
 const auth = getAuth(app);
 
-window.__FB = { app, db, auth, ref, set, get, update, onValue, onDisconnect, serverTimestamp, push };
+window.__FB = { app, db, auth, ref, set, get, update, remove, onValue, onDisconnect, serverTimestamp, push };
 
 signInAnonymously(auth)
   .then(() => console.log("🔥 Firebase auth OK"))
@@ -1370,7 +1370,7 @@ signInAnonymously(auth)
     </div>
 
     <audio id="bgMusic" loop style="display:none;">
-        <source src="Kansas - Carry On Wayward Son Live — копия.mp3" type="audio/mpeg">
+        <source src="Kansas_carry_on_wayward_son.mp3" type="audio/mpeg">
     </audio>
 
     <script>
