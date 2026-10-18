@@ -487,12 +487,20 @@ signInAnonymously(auth)
             font-size: 0.7em !important;
             cursor: pointer;
         }
-        .status-item {
+                .status-item {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.85em;
             color: #8a7a5a;
+        }
+        #teacherInfoBlock .status-item {
+            color: #c9b890;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+        }
+        #teacherInfoBlock .btn-check {
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
         }
         .status-item .dot {
             width: 10px;
@@ -681,8 +689,8 @@ signInAnonymously(auth)
 }
 
 #sideNav.collapsed .nav-link {
-    font-size: 0.4em !important;
-    padding: 2px 3px;
+    font-size: 0.55em !important;
+    padding: 3px 4px;
 }
 
 #sideNav.collapsed .nav-link .nav-icon {
@@ -690,56 +698,61 @@ signInAnonymously(auth)
 }
 
 #sideNav .nav-link {
-    color: #6a5a4a;
+    color: #a89878;
     text-decoration: none;
-    font-size: 0.45em;
+    font-size: 0.7em;
     font-family: 'Cinzel', serif;
-    padding: 2px 4px;
+    padding: 4px 6px;
     border-radius: 4px;
     transition: all 0.3s;
-    text-align: center;
-    line-height: 1.1;
+    text-align: left;
+    line-height: 1.25;
     white-space: nowrap;
 }
 
 #sideNav .nav-link:hover {
-    color: #d4a060;
+    color: #f0d090;
+    background: rgba(139,58,42,0.25);
+}
+
+#sideNav .nav-sublink:hover {
+    color: #f0d090;
     background: rgba(139,58,42,0.2);
 }
 
 #sideNav .nav-link .nav-icon {
-    font-size: 1em;
+    font-size: 1.1em;
 }
 
 #sideNav .nav-link .nav-label {
-    font-size: 0.45em;
-    color: #6a5a4a;
-    letter-spacing: 0.3px;
+    font-size: 0.85em;
+    color: #a89878;
+    letter-spacing: 0.4px;
+    margin-left: 4px;
 }
 
 /* Кнопка сворачивания */
 #sideNav .nav-toggle {
     background: transparent;
     border: none;
-    color: #6a5a4a;
+    color: #a89878;
     cursor: pointer;
-    font-size: 0.6em;
-    padding: 2px 0;
+    font-size: 0.85em;
+    padding: 4px 0;
     text-align: center;
     transition: all 0.3s;
     font-family: 'Cinzel', serif;
-    border-top: 1px solid #2a2018;
-    padding-top: 4px;
-    margin-top: 2px;
+    border-top: 1px solid #3a2a1a;
+    padding-top: 6px;
+    margin-top: 4px;
 }
-
 #sideNav .nav-toggle:hover {
     color: #d4a060;
 }
 
 #sideNav.collapsed .nav-toggle {
-    font-size: 0.5em;
-    padding: 1px 0;
+    font-size: 0.7em;
+    padding: 2px 0;
 }
 
 /* Скрываем скроллбар, но оставляем возможность скроллить */
@@ -754,6 +767,25 @@ signInAnonymously(auth)
 #sideNav::-webkit-scrollbar-thumb {
     background: #3a2a1a;
     border-radius: 2px;
+}
+
+
+/* ===== РАСШИРЕННОЕ МЕНЮ: ПОДПУНКТЫ ===== */
+#sideNav .nav-group { display: flex; flex-direction: column; }
+#sideNav .nav-parent { display: flex; align-items: center; gap: 3px; }
+#sideNav .nav-caret { font-size: 0.9em; color: #a89878; margin-left: auto; transition: transform 0.2s; }
+#sideNav .nav-parent.open .nav-caret { transform: rotate(90deg); }
+#sideNav .nav-sub { display: none; flex-direction: column; padding-left: 10px; border-left: 2px solid #3a2a1a; margin: 3px 0 3px 8px; gap: 2px; }
+#sideNav .nav-sub.open { display: flex; }
+#sideNav .nav-sublink {
+    color: #9a8a6a; text-decoration: none; font-size: 0.72em;
+    padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+    font-family: 'Cinzel', serif; line-height: 1.35;
+}
+#sideNav .nav-sublink:hover { color: #d4a060; background: rgba(139,58,42,0.15); }
+#sideNav.collapsed .nav-sub { display: none !important; }
+h2[id^="sec-"], div#sec-reflection {
+    scroll-margin-top: 100px;
 }
 
         #scrollTopBtn {
@@ -813,7 +845,7 @@ signInAnonymously(auth)
             .modal-question { font-size: 1em; }
         }
 
-        /* Timer styles */
+                /* Timer styles */
         #mainTimer {
             position: fixed;
             top: 10px;
@@ -830,7 +862,9 @@ signInAnonymously(auth)
             font-size: 0.75em;
             user-select: none;
         }
-        #mainTimer:hover { border-color: #8b3a2a; }
+               #mainTimer:hover { border-color: #8b3a2a; }
+        body.teacher-bar-active #mainTimer { top: 90px; }
+        body.teacher-bar-active.teacher-bar-collapsed #mainTimer { top: 40px; }
         #mainTimer .timer-row {
             display: flex;
             align-items: center;
@@ -1162,36 +1196,108 @@ signInAnonymously(auth)
 
 
 
-<!-- ===== SIDE NAVIGATION ===== -->
+<!-- ===== SIDE NAVIGATION (РАСШИРЕННОЕ v2) ===== -->
 <div id="sideNav">
-    <!-- Кнопка сворачивания -->
     <button class="nav-toggle" onclick="toggleSideNav()" title="Свернуть/развернуть навигацию">◀</button>
-    
-   
-<a href="#ex5" class="nav-link" data-section="ex5"><div class="nav-icon">🆔</div><div class="nav-label">ID Card</div></a>
-    <a href="#ex1" class="nav-link" data-section="ex1"><div class="nav-icon">2</div><div class="nav-label">Getting to know</div></a>
-    <a href="#ex2" class="nav-link" data-section="ex2"><div class="nav-icon">3</div><div class="nav-label">Supernatural connection</div></a>
-    <a href="#ex3" class="nav-link" data-section="ex3"><div class="nav-icon">4</div><div class="nav-label">Who is Who</div></a>
-    <a href="#ex4" class="nav-link" data-section="ex4"><div class="nav-icon">5</div><div class="nav-label">Which Brother?</div></a>
-    
-    <a href="#ex6" class="nav-link" data-section="ex6"><div class="nav-icon">6</div><div class="nav-label">? in Trunk</div></a>
-    <a href="#ex7" class="nav-link" data-section="ex7"><div class="nav-icon">7 📝</div><div class="nav-label">Grammar</div></a>
-<a href="#ex9" class="nav-link" data-section="ex9"><div class="nav-icon">8</div><div class="nav-label">Song</div></a>
-<a href="#ex10" class="nav-link" data-section="ex10"><div class="nav-icon">9</div><div class="nav-label">Reading</div></a>
 
+    <div class="nav-group">
+        <a href="#sec-id" class="nav-link" data-section="sec-id"><span class="nav-icon">🆔</span><span class="nav-label">ID Card</span></a>
+    </div>
 
-    <a href="#ex8" class="nav-link" data-section="ex8"><div class="nav-icon">🏆</div><div class="nav-label">Final</div></a>
+    <div class="nav-group">
+        <a href="#sec-intro" class="nav-link" data-section="sec-intro"><span class="nav-icon">👋</span><span class="nav-label">Getting to Know</span></a>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-supernatural" class="nav-link" data-section="sec-supernatural"><span class="nav-icon">🎬</span><span class="nav-label">Supernatural</span></a>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-whoiswho" class="nav-link" data-section="sec-whoiswho"><span class="nav-icon">🔍</span><span class="nav-label">Who is Who</span></a>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-brother" class="nav-link" data-section="sec-brother"><span class="nav-icon">🤔</span><span class="nav-label">Which Brother</span></a>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-trunk" class="nav-link" data-section="sec-trunk"><span class="nav-icon">🧳</span><span class="nav-label">Trunk</span></a>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-grammar" class="nav-link" data-section="sec-grammar"><span class="nav-icon">📝</span><span class="nav-label">Grammar</span></a>
+    </div>
+
+    <div class="nav-group">
+                <a href="#sec-song" class="nav-link nav-parent" data-section="sec-song" onclick="toggleSubnav('sub-song');">
+            <span class="nav-icon">🎵</span><span class="nav-label">Song</span><span class="nav-caret">▸</span>
+        </a>
+               <div class="nav-sub" id="sub-song">
+            <a href="#song-before-listening" class="nav-sublink">Before Listening</a>
+            <a href="#song-vocab" class="nav-sublink">Vocabulary</a>
+            <a href="#song-listen" class="nav-sublink">🎸 Listen to the Song</a>
+            <a href="#song-grammar-though" class="nav-sublink">Though (1A/1B)</a>
+            <a href="#song-grammar-pronouns" class="nav-sublink">They / Them (2A/2B)</a>
+            <a href="#song-grammar-future" class="nav-sublink">Future + When (3A/3B/3C)</a>
+            <a href="#song-grammar-past" class="nav-sublink">Past Process (4A/4B)</a>
+            <a href="#song-fill-blanks" class="nav-sublink">Fill in Blanks</a>
+            <a href="#song-after-listening" class="nav-sublink">After Listening</a>
+        </div>
+    </div>
+
+    <div class="nav-group">
+                <a href="#sec-reading" class="nav-link nav-parent" data-section="sec-reading" onclick="toggleSubnav('sub-reading');">
+            <span class="nav-icon">📖</span><span class="nav-label">Reading</span><span class="nav-caret">▸</span>
+        </a>
+        <div class="nav-sub" id="sub-reading">
+            <a href="#reading-act1" class="nav-sublink">Act I — Chorus</a>
+            <a href="#reading-act2" class="nav-sublink">Act II — Verse 1</a>
+            <a href="#reading-act3" class="nav-sublink">Act III — Verse 2</a>
+            <a href="#reading-act4" class="nav-sublink">Act IV — Outro</a>
+            <a href="#reading-quiz" class="nav-sublink">Quiz (10 вопросов)</a>
+        </div>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-reflection" class="nav-link" data-section="sec-reflection"><span class="nav-icon">📝</span><span class="nav-label">Reflection</span></a>
+    </div>
+
+    <div class="nav-group">
+        <a href="#sec-final" class="nav-link" data-section="sec-final"><span class="nav-icon">🏆</span><span class="nav-label">Final</span></a>
+    </div>
 </div>
+
+
+<script>
+function toggleSubnav(id) {
+    const sub = document.getElementById(id);
+    if (!sub) return;
+    const parent = sub.previousElementSibling;
+    sub.classList.toggle('open');
+    if (parent) parent.classList.toggle('open');
+    localStorage.setItem('nav_sub_' + id, sub.classList.contains('open') ? '1' : '0');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-sub').forEach(sub => {
+        if (localStorage.getItem('nav_sub_' + sub.id) === '1') {
+            sub.classList.add('open');
+            const parent = sub.previousElementSibling;
+            if (parent) parent.classList.add('open');
+        }
+    });
+});
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const navLinks = document.querySelectorAll('.nav-link');
-        const sections = document.querySelectorAll('.exercise');
+        const sections = document.querySelectorAll('h2[id^="sec-"], div#sec-reflection');
         function updateActiveNav() {
             let currentSection = '';
             sections.forEach(section => {
                 const rect = section.getBoundingClientRect();
-                if (rect.top <= 150 && rect.bottom >= 150) currentSection = section.id;
+                if (rect.top <= 150 && rect.bottom >= 0) currentSection = section.id;
             });
             navLinks.forEach(link => {
                 const linkSection = link.getAttribute('data-section');
@@ -1463,7 +1569,7 @@ signInAnonymously(auth)
 </div>
 
 <!-- ===== ЭКРАН 5: УЧИТЕЛЬ В КОМНАТЕ ===== -->
-<div id="teacherInfoBlock" class="status-bar" style="display:none; justify-content:space-between; position:fixed; top:0; left:0; right:0; z-index:9997; margin-bottom:0; border-radius:0; border-left:none; border-right:none; border-top:none; backdrop-filter:blur(8px); background:rgba(10,10,10,0.92); box-shadow:0 4px 20px rgba(0,0,0,0.6); transition:transform 0.3s ease, padding 0.3s ease;">
+<div id="teacherInfoBlock" class="status-bar" style="display:none; justify-content:space-between; position:fixed; top:0; left:0; right:0; z-index:9997; margin-bottom:0; border-radius:0; border-left:none; border-right:none; border-top:none; backdrop-filter:blur(6px); background:rgba(10,10,10,0.55); box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:transform 0.3s ease, padding 0.3s ease;">
        <button onclick="toggleTeacherBar()" style="position:fixed; top:4px; right:4px; z-index:9999; background:rgba(20,18,15,0.95); border:1px solid #3a2a1a; border-radius:6px; color:#d4a060; padding:2px 10px; font-family:'Cinzel', serif; font-size:0.7em; cursor:pointer;" title="Свернуть/развернуть панель" id="teacherBarToggle">▾</button>
     <div class="status-item">
         <span class="dot online"></span>
@@ -1992,7 +2098,7 @@ function startHeartbeat() {
             lastSeen: fb.serverTimestamp(),
             online: true
         }).catch(() => {});
-    }, 30000);
+       }, 60000);
 
     // При закрытии вкладки
     window.addEventListener('beforeunload', () => {
@@ -2249,18 +2355,20 @@ async function renderTeacherPanel() {
             <button onclick="teacherVideoSeekByBoth(10)" class="tp-btn">⏩ +10 сек</button>
             <button onclick="teacherVideoSeekToBoth(0)" class="tp-btn">⏮ В начало</button>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button onclick="teacherScrollTo('top')" class="tp-btn">⬆ В начало</button>
-            <button onclick="teacherScrollTo('ex5')" class="tp-btn">🆔 ID Card</button>
-            <button onclick="teacherScrollTo('ex1')" class="tp-btn">👋 Getting to Know</button>
-            <button onclick="teacherScrollTo('ex2')" class="tp-btn">🎬 Supernatural</button>
-            <button onclick="teacherScrollTo('ex3')" class="tp-btn">🔍 Who is Who</button>
-            <button onclick="teacherScrollTo('ex4')" class="tp-btn">🤔 Which Brother</button>
-            <button onclick="teacherScrollTo('ex6')" class="tp-btn">🧳 Trunk</button>
-            <button onclick="teacherScrollTo('ex7')" class="tp-btn">📝 Grammar</button>
-            <button onclick="teacherScrollTo('ex9')" class="tp-btn">🎵 Song</button>
-            <button onclick="teacherScrollTo('ex10')" class="tp-btn">📖 Reading</button>
-            <button onclick="teacherScrollTo('ex8')" class="tp-btn">🏆 Final</button>
+            <button onclick="teacherScrollTo('sec-id')" class="tp-btn">🆔 ID Card</button>
+            <button onclick="teacherScrollTo('sec-intro')" class="tp-btn">👋 Getting to Know</button>
+            <button onclick="teacherScrollTo('sec-supernatural')" class="tp-btn">🎬 Supernatural</button>
+            <button onclick="teacherScrollTo('sec-whoiswho')" class="tp-btn">🔍 Who is Who</button>
+            <button onclick="teacherScrollTo('sec-brother')" class="tp-btn">🤔 Which Brother</button>
+            <button onclick="teacherScrollTo('sec-trunk')" class="tp-btn">🧳 Trunk</button>
+            <button onclick="teacherScrollTo('sec-grammar')" class="tp-btn">📝 Grammar</button>
+                        <button onclick="teacherScrollTo('sec-song')" class="tp-btn">🎵 Song</button>
+            <button onclick="teacherScrollTo('song-listen')" class="tp-btn">🎸 Listen</button>
+            <button onclick="teacherScrollTo('sec-reading')" class="tp-btn">📖 Reading</button>
+            <button onclick="teacherScrollTo('sec-reflection')" class="tp-btn">📝 Reflection</button>
+            <button onclick="teacherScrollTo('sec-final')" class="tp-btn">🏆 Final</button>
           </div>
           <p style="color:#6a5a4a;font-size:0.75em;margin:8px 0 0 0;">💡 Ученики автоматически прокрутят страницу к нужному разделу.</p>
         </div>
@@ -2280,14 +2388,9 @@ async function renderTeacherPanel() {
     document.body.appendChild(overlay);
 
     // Подписываемся на изменение списка учеников — авто-обновление
-       if (teacherUnsub) teacherUnsub();
+           if (teacherUnsub) teacherUnsub();
     const studentsRef = fb.ref(fb.db, `rooms/${roomId}/students`);
     teacherUnsub = fb.onValue(studentsRef, async snap => {
-        // ❗ каждый раз заново подписываемся на answers всех учеников
-        if (window._teacherAnswerSubs) {
-            window._teacherAnswerSubs.forEach(u => u());
-        }
-        window._teacherAnswerSubs = [];
         const students = snap.val() || {};
         const grid = document.getElementById('teacherStudentsGrid');
         if (!grid) return;
@@ -2295,15 +2398,15 @@ async function renderTeacherPanel() {
         const keys = Object.keys(students);
         const onlineCount = keys.filter(k => students[k] && students[k].online).length;
 
-        // Считаем суммарную статистику
-        let totalAnswers = 0;
         const cardsData = [];
         for (const key of keys) {
             const s = students[key] || {};
             const aSnap = await fb.get(fb.ref(fb.db, `rooms/${roomId}/answers/${key}`));
             const answers = aSnap.val() || {};
-            const filled = Object.keys(answers).length;
-            totalAnswers += filled;
+            let filled = 0;
+            for (const k in answers) {
+                if (answers[k] && answers[k].v !== undefined && answers[k].v !== '') filled++;
+            }
             cardsData.push({ key, s, filled });
         }
 
@@ -2316,12 +2419,11 @@ async function renderTeacherPanel() {
             return;
         }
 
-        // Сортируем: онлайн первые
         cardsData.sort((a,b) => (b.s.online?1:0) - (a.s.online?1:0));
 
         let html = `
           <div style="grid-column:1/-1;color:#b0a890;font-size:0.85em;padding:8px 12px;background:#1a1611;border-radius:8px;margin-bottom:6px;">
-            👥 Всего: <strong>${keys.length}</strong> · 🟢 Онлайн: <strong style="color:#27ae60;">${onlineCount}</strong> · 📝 Всего ответов: <strong>${totalAnswers}</strong>
+            👥 Всего: <strong>${keys.length}</strong> · 🟢 Онлайн: <strong style="color:#27ae60;">${onlineCount}</strong>
           </div>
         `;
 
@@ -2344,14 +2446,14 @@ async function renderTeacherPanel() {
     });
 }
 
-// ============ УПРАВЛЕНИЕ ПРЕЗЕНТАЦИЕЙ ============
+/// ============ УПРАВЛЕНИЕ ПРЕЗЕНТАЦИЕЙ ============
 async function teacherScrollTo(sectionId) {
     if (!fb) fb = await waitForFB();
     if (syncPaused) return;  // учитель на паузе — не шлём
     let y = 0;
     if (sectionId !== 'top') {
         const el = document.getElementById(sectionId);
-        if (el) y = Math.round(el.getBoundingClientRect().top + window.scrollY - 100);
+        if (el) y = Math.round(el.getBoundingClientRect().top + window.scrollY - 120);
     }
     // Локально едем сами
     window.scrollTo({ top: y, behavior: 'smooth' });
@@ -2518,13 +2620,14 @@ function startTeacherAutoScroll() {
         clearTimeout(autoScrollTimer);
         autoScrollTimer = setTimeout(function() {
             const y = Math.round(window.scrollY);
-            if (Math.abs(y - lastSentScroll) < 50) return;
+            const threshold = 10;   // было 50
+if (Math.abs(y - lastSentScroll) < threshold) return;
             lastSentScroll = y;
             fb.set(fb.ref(fb.db, `rooms/${roomId}/scrollCommand`), {
                 y: y,
                 at: Date.now()                    // локальное время, не serverTimestamp
             }).catch(function(e) { console.warn('scroll sync:', e); });
-        }, 250);
+        }, 100);   // было 250
     });
 }
 
@@ -2536,16 +2639,12 @@ function listenTeacherScroll() {
     window._studentScrollAttached = true;
 
     const scrollRef = fb.ref(fb.db, `rooms/${roomId}/scrollCommand`);
-    let lastApplied = 0;
-
     fb.onValue(scrollRef, function(snap) {
-        const cmd = snap.val();
-        if (!cmd || cmd.y === undefined || !cmd.at) return;
-        if (cmd.at <= lastApplied) return;
-        lastApplied = cmd.at;
-        if (studentFrozen) return;                // ученик сам смотрит
-        window.scrollTo({ top: cmd.y, behavior: 'smooth' });
-    });
+    const cmd = snap.val();
+    if (!cmd || cmd.y === undefined) return;
+    if (studentFrozen) return;
+    window.scrollTo(0, cmd.y);   // ← всегда едем на последнюю позицию
+});
 }
 
 
@@ -2669,7 +2768,7 @@ window.addEventListener('load', async () => {
     </div>
     <div style="margin-top: 10px; padding: 6px 14px; background: rgba(39,174,96,0.1); border-radius: 4px; border-left: 3px solid #27ae60; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
        
-        <span style="color: #6a5a4a; font-size: 0.7em;">🏆 <span id="roadmapProgress">0</span>/8 tasks completed</span>
+        <span style="color: #6a5a4a; font-size: 0.7em;">🏆 <span id="roadmapProgress">0</span>/<span id="roadmapTotal">11</span> tasks completed</span>
     </div>
 </div>
 
@@ -2680,10 +2779,12 @@ window.addEventListener('load', async () => {
         const roadmapSpan = document.getElementById('roadmapProgress');
         if (!roadmapSpan) return;
         
-        function updateRoadmapProgress() {
+                function updateRoadmapProgress() {
             const checked = document.querySelectorAll('.progress-check:checked').length;
             const total = document.querySelectorAll('.progress-check').length;
             roadmapSpan.textContent = checked;
+            const totalSpan = document.getElementById('roadmapTotal');
+            if (totalSpan) totalSpan.textContent = total;
         }
         
         // Обновляем при изменении прогресса
@@ -2708,7 +2809,7 @@ window.addEventListener('load', async () => {
         <label><input type="checkbox" class="progress-check" data-section="trunk"> 6. Questions in the Trunk</label>
         <label><input type="checkbox" class="progress-check" data-section="grammar"> 7. Grammar</label>
 <label><input type="checkbox" class="progress-check" data-section="song"> 8. Theme Song</label>
-<label><input type="checkbox" class="progress-check" data-section="grammar"> 9. Reading</label>
+<label><input type="checkbox" class="progress-check" data-section="reading"> 9. Reading</label>
 
 
 
@@ -2755,8 +2856,7 @@ window.addEventListener('load', async () => {
     <!-- ===== 1. OFFICIAL HUNTER'S ID CARD ===== -->
     <!-- ============================================================ -->
 
-    <h2>🆔 1. Official Hunter's ID Card</h2>
-
+        <h2 id="sec-id">🆔 1. Official Hunter's ID Card</h2>
                 <img src="photo/Identification_card.jpg" alt="Fake IDs — examples of Winchester-style ID cards" style="display:block; margin:15px auto 20px auto; max-width:40%; width:40%; height:auto
             mask-image: radial-gradient(ellipse 82% 88% at 50% 50%, #000 62%, transparent 100%);
             -webkit-mask-image: radial-gradient(ellipse 82% 78% at 60% 60%, #000 82%, transparent 100%);">
@@ -2843,13 +2943,15 @@ function toggleIDAnswers() {
     </script>
 
 
- <!-- ============================================================ -->
+ <div class="exercise" id="ex1">   
+<!-- ============================================================ -->
     <!-- ===== 2. GETTING TO KNOW EACH OTHER ===== -->
     <!-- ============================================================ -->
 
-    <h2>👋 2. Getting to Know Each Other</h2>
+  
+<h2 id="sec-intro">👋 2. Getting to Know Each Other</h2>
 
-    <div class="exercise" id="ex1">
+    
         <div class="exercise-number"><span class="supernatural-icon">🩸</span> 2</div>
         <h3>Complete the questions and answer them!</h3>
         <p class="text-muted">👻 Fill in the blanks with the correct words. Then answer the questions.</p>
@@ -3040,7 +3142,7 @@ function toggleIDAnswers() {
     <!-- ===== 3. SUPERNATURAL CONNECTION ===== -->
     <!-- ============================================================ -->
 
-    <h2>🩸 3. Supernatural Connection</h2>
+       <h2 id="sec-supernatural">🩸 3. Supernatural Connection</h2>
 
 
     <div class="exercise" id="ex2">
@@ -3171,8 +3273,7 @@ function toggleIDAnswers() {
     <!-- ===== 4. WHO IS WHO? — Dean vs Sam ===== -->
     <!-- ============================================================ -->
 
-    <h2>🔍 4. Who is Who? — Dean vs Sam</h2>
-
+       <h2 id="sec-whoiswho">🔍 4. Who is Who? — Dean vs Sam</h2>
     <div class="exercise" id="ex3">
         <div class="exercise-number"><span class="supernatural-icon">🕵️</span> 4</div>
         <h3>Match the descriptions to the right brother</h3>
@@ -3468,7 +3569,7 @@ function toggleIDAnswers() {
     <!-- ===== 5. WHICH BROTHER ARE YOU? ===== -->
     <!-- ============================================================ -->
 
-    <h2>🤔 5. Which Brother Are You?</h2>
+        <h2 id="sec-brother">🤔 5. Which Brother Are You?</h2>
 
     <div class="exercise" id="ex4">
         <div class="exercise-number"><span class="supernatural-icon">👤</span> 5</div>
@@ -3581,8 +3682,7 @@ function toggleIDAnswers() {
     <!-- ===== 6. THE IMPALA'S TRUNK — Interactive Test ===== -->
     <!-- ============================================================ -->
 
-    <h2>🧳 6. The Impala's Trunk</h2>
-
+       <h2 id="sec-trunk">🧳 6. The Impala's Trunk</h2>
         <img src="photo/The_Impala's_Trunk.jpg" alt="The Impala's trunk — full of hunting gear" style="display:block; margin:15px auto; max-width:100%; width:160%; height:auto;
             mask-image: radial-gradient(ellipse 82% 78% at 60% 50%, #000 62%, transparent 100%);
             -webkit-mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 62%, transparent 100%);">
@@ -3665,8 +3765,7 @@ function toggleIDAnswers() {
 
         
 
-    <h2>📝 7. Grammar Level Check</h2>
-
+        <h2 id="sec-grammar">📝 7. Grammar Level Check</h2>
     <div class="exercise" id="ex7">
 
 
@@ -3997,7 +4096,7 @@ function resetGrammarFull() {
     <!-- ============================================================ -->
 
        
-    <h2>🎵 8. Supernatural Theme Song — "Carry On Wayward Son"</h2>
+       <h2 id="sec-song">🎵 8. Supernatural Theme Song — "Carry On Wayward Son"</h2>
 
 
 
@@ -4006,7 +4105,7 @@ function resetGrammarFull() {
 
 
  <!-- ===== BEFORE LISTENING ===== -->
-        <div style="margin-top:20px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #f1c40f;">
+                <div id="song-before-listening" style="margin-top:20px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #f1c40f;">
             <h4 style="color:#d4a060; font-family:'Cinzel',serif; font-size:0.95em; margin:0 0 8px 0;">💬 Before Listening — Discuss these questions</h4>
 
             <div style="display:grid; gap:12px;">
@@ -4045,7 +4144,7 @@ function resetGrammarFull() {
 <!-- ===== DIFFICULT WORDS & PHRASES (с hover) ===== -->
 
 
-        <div style="margin-top:15px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #8b3a2a;">
+              <div id="song-vocab" style="margin-top:15px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #8b3a2a;">
             <h4 style="color:#d4a060; font-family:'Cinzel',serif; font-size:0.95em; margin:0 0 8px 0;">📖 All Difficult Words & Phrases — Translation and Explanation</h4>
             <p class="text-muted" style="font-size:0.8em;">👻 Hover over the word to see the translation and meaning. Click 🔊 to listen.</p>
 
@@ -4299,8 +4398,8 @@ function resetGrammarFull() {
 
 
 
-        <div class="exercise-number"><span class="supernatural-icon">🎸</span> 8</div>
-        <h3>Listen to the theme song of Supernatural</h3>
+               <div class="exercise-number"><span class="supernatural-icon">🎸</span> 8</div>
+        <h3 id="song-listen">Listen to the theme song of Supernatural</h3>
         <p class="text-muted">👻 "Carry On Wayward Son" by Kansas — the iconic song of the Winchester brothers.</p>
 
 
@@ -4433,7 +4532,7 @@ But surely heaven waits for you.
 
 
 <!-- ===== GRAMMAR 1: THOUGH (уступка) — PRACTICE EXERCISES ===== -->
-<div style="margin-top:15px; padding:12px 16px; background:rgba(10,10,10,0.4); border-radius:6px; border-left:3px solid #27ae60;">
+<div id="song-grammar-though" style="margin-top:15px; padding:12px 16px; background:rgba(10,10,10,0.4); border-radius:6px; border-left:3px solid #27ae60;">
     <h5 style="color:#27ae60; font-family:'Cinzel',serif; font-size:0.9em; margin:0 0 4px 0;">1.  Though my eyes could see, I still was a blind man. </h5>
     <p style="color:#6a7a7a; font-size:0.8em; margin-bottom:6px;">📌 В песне: <span style="color:#d4a060;">"Though my eyes could see, I still was a blind man."</span> — <span style="color:#b0a890;">Показывает контраст (хотя / несмотря на то, что).</span></p>
 <p> Contrast with "Though" </p>
@@ -4523,7 +4622,7 @@ But surely heaven waits for you.
 
 
 <!-- ===== GRAMMAR 2: SUBJECT vs OBJECT PRONOUNS (THEY vs THEM) ===== -->
-<div style="margin-top:15px; padding:12px 16px; background:rgba(10,10,10,0.4); border-radius:6px; border-left:3px solid #8e44ad;">
+<div id="song-grammar-pronouns" style="margin-top:15px; padding:12px 16px; background:rgba(10,10,10,0.4); border-radius:6px; border-left:3px solid #8e44ad;">
     <h5 style="color:#8e44ad; font-family:'Cinzel',serif; font-size:0.9em; margin:0 0 4px 0;">2. I can hear them say</h5>
     <p style="color:#6a7a7a; font-size:0.8em; margin-bottom:6px;">📌 В песне: <span style="color:#d4a060;">"I hear the voices when I'm dreaming, I can hear them say..."</span> — <span style="color:#b0a890;">Почему "them", а не "they"?</span></p>
 <p> Subject vs Object Pronouns </p>
@@ -4638,7 +4737,7 @@ But surely heaven waits for you.
 
 
 <!-- ===== GRAMMAR 3: FUTURE SIMPLE + TIME CLAUSES (There'll be / when) ===== -->
-<div style="margin-top:15px; padding:12px 16px; background:rgba(10,10,10,0.4); border-radius:6px; border-left:3px solid #f1c40f;">
+<div id="song-grammar-future" style="margin-top:15px; padding:12px 16px; background:rgba(10,10,10,0.4); border-radius:6px; border-left:3px solid #f1c40f;">
     <h5 style="color:#f1c40f; font-family:'Cinzel',serif; font-size:0.9em; margin:0 0 4px 0;">3.  There'll be peace when you are done</h5>
     <p style="color:#6a7a7a; font-size:0.8em; margin-bottom:6px;">📌 В песне: <span style="color:#d4a060;">"There'll be peace when you are done."</span> — <span style="color:#b0a890;">Конструкция для предсказаний и обещаний + правило времени.</span></p>
 <p>Future Simple + Time Clauses</p>
@@ -4884,7 +4983,7 @@ But surely heaven waits for you.
 
 
 <!-- ===== 4. GRAMMAR INTEGRATION: PAST PROCESS vs INTERRUPTION (UPGRADED STYLES) ===== -->
-<div style="margin-top:20px; padding:16px 20px; background:rgba(15,15,15,0.65); border-radius:8px; border-left:4px solid #8e44ad; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+<div id="song-grammar-past" style="margin-top:20px; padding:16px 20px; background:rgba(15,15,15,0.65); border-radius:8px; border-left:4px solid #8e44ad; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
     
     <h4 style="color:#a29bfe; font-family:'Cinzel',serif; font-size:1.1em; margin:0 0 8px 0; letter-spacing: 0.5px;">
        4. 🚀 I was soaring ever higher, but I flew too high.
@@ -5100,7 +5199,7 @@ But surely heaven waits for you.
 
 
                <!-- ===== FILL IN THE BLANKS ===== -->
-        <div style="margin-top:15px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #27ae60;">
+                <div id="song-fill-blanks" style="margin-top:15px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #27ae60;">
             <h4 style="color:#d4a060; font-family:'Cinzel',serif; font-size:0.95em; margin:0 0 8px 0;">📝 Fill in the Blanks — Listen and complete the lyrics</h4>
             <p class="text-muted" style="font-size:0.8em;">👻 Listen to the song and fill in the missing words.</p>
 
@@ -5197,7 +5296,7 @@ But I hear the voices say
 
 
         <!-- ===== AFTER LISTENING ===== -->
-        <div style="margin-top:15px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #e74c3c;">
+               <div id="song-after-listening" style="margin-top:15px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #e74c3c;">
             <h4 style="color:#d4a060; font-family:'Cinzel',serif; font-size:0.95em; margin:0 0 8px 0;">💬 After Listening — Discuss these questions</h4>
 
             <div style="display:grid; gap:12px;">
@@ -5392,7 +5491,7 @@ But I hear the voices say
 <!-- ===== READING: SONG MEANING & REAL-LIFE APPLICATION ===== -->
 <!-- ============================================================ -->
 
- <h2> 9. READING: SONG MEANING & REAL-LIFE APPLICATION </h2>
+ <h2 id="sec-reading"> 9. READING: SONG MEANING & REAL-LIFE APPLICATION </h2>
 
     <div class="exercise" id="ex10">
 
@@ -5422,8 +5521,7 @@ But I hear the voices say
     <div style="background: rgba(10,10,10,0.6); border: 1px solid #3a2a1a; border-radius: 10px; padding: 20px 25px; max-height: 600px; overflow-y: auto; font-size: 1em; line-height: 1.8; color: #d4c9a8;">
 
         <!-- ===== ACT I ===== -->
-        <h5 style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act I: The Anthem of Resilience (The Chorus)</h5>
-        
+                <h5 id="reading-act1" style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act I: The Anthem of Resilience (The Chorus)</h5>
         <div style="background: rgba(20,18,15,0.4); padding: 15px 20px; border-radius: 6px; border-left: 4px solid #f1c40f; margin: 10px 0 20px 0; font-family: 'Courier New', monospace; color: #f1c40f; font-size: 1em;">
             Carry on, my wayward son<br>
             There'll be peace when you are done<br>
@@ -5506,7 +5604,7 @@ But I hear the voices say
         <hr style="border: 1px solid #2a2018; margin: 25px 0;">
 
         <!-- ===== ACT II ===== -->
-        <h5 style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act II: The Conflict of the Mind (Verse 1)</h5>
+               <h5 id="reading-act2" style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act II: The Conflict of the Mind (Verse 1)</h5>
 
         <div style="background: rgba(20,18,15,0.4); padding: 15px 20px; border-radius: 6px; border-left: 4px solid #f1c40f; margin: 10px 0 20px 0; font-family: 'Courier New', monospace; color: #f1c40f; font-size: 1em;">
             Once I rose above the noise and confusion<br>
@@ -5586,8 +5684,7 @@ But I hear the voices say
         <hr style="border: 1px solid #2a2018; margin: 25px 0;">
 
         <!-- ===== ACT III ===== -->
-        <h5 style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act III: The Trap of Pretending (Verse 2)</h5>
-
+                <h5 id="reading-act3" style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act III: The Trap of Pretending (Verse 2)</h5>
         <div style="background: rgba(20,18,15,0.4); padding: 15px 20px; border-radius: 6px; border-left: 4px solid #f1c40f; margin: 10px 0 20px 0; font-family: 'Courier New', monospace; color: #f1c40f; font-size: 1em;">
             Masqueraded as a man with a reason<br>
             My charade was the event of the season<br>
@@ -5676,7 +5773,7 @@ But I hear the voices say
         <hr style="border: 1px solid #2a2018; margin: 25px 0;">
 
         <!-- ===== ACT IV ===== -->
-        <h5 style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act IV: No Looking Back (The Outro)</h5>
+               <h5 id="reading-act4" style="color: #d4a060; font-size: 1.1em; margin: 20px 0 15px 0; font-family: 'Cinzel', serif; letter-spacing: 2px; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px;">Act IV: No Looking Back (The Outro)</h5>
 
         <div style="background: rgba(20,18,15,0.4); padding: 15px 20px; border-radius: 6px; border-left: 4px solid #f1c40f; margin: 10px 0 20px 0; font-family: 'Courier New', monospace; color: #f1c40f; font-size: 1em;">
             No more!<br>
@@ -5713,7 +5810,7 @@ But I hear the voices say
 <!-- ===== INTERACTIVE QUIZ (B1 LEVEL, 10 QUESTIONS) ===== -->
 <!-- ============================================================ -->
 
-<div style="margin-top:25px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #d4a060;">
+<div id="reading-quiz" style="margin-top:25px; padding:15px 20px; background:rgba(20,18,15,0.5); border-radius:8px; border-left:3px solid #d4a060;">
     <h2 style="color:#d4a060; font-family:'Cinzel',serif; font-size:0.95em; margin:0 0 8px 0;">📝 Interactive Quiz — "Carry On Wayward Son"</h2>
     <p class="text-muted" style="font-size:0.8em;">👻 Click on the answer you think is correct. Check your understanding!</p>
 
@@ -6011,7 +6108,7 @@ But I hear the voices say
 
 
 <!-- ===== EXIT TICKET / РЕФЛЕКСИЯ ===== -->
-<div style="margin: 20px 0; padding: 20px 25px; background: rgba(20,18,15,0.6); border-radius: 10px; border: 1px solid #3a2a1a; border-left: 4px solid #d4a060;">
+<div id="sec-reflection" style="margin: 20px 0; padding: 20px 25px; background: rgba(20,18,15,0.6); border-radius: 10px; border: 1px solid #3a2a1a; border-left: 4px solid #d4a060;">
     <h4 style="color: #d4a060; font-family: 'Cinzel', serif; font-size: 0.95em; margin: 0 0 12px 0;">📝 Exit Ticket — Reflect on the Lesson</h4>
     <p style="color: #6a7a7a; font-size: 0.8em; margin-bottom: 12px;">👻 Answer these questions to complete your first mission. Write your thoughts in English!</p>
 
@@ -6154,7 +6251,7 @@ But I hear the voices say
 
       
 
-    <h2>🏆 Mission Complete</h2>
+        <h2 id="sec-final">🏆 Mission Complete</h2>
 
     <div class="exercise" id="ex8" style="text-align:center; border-color: #8b3a2a;">
         <div class="exercise-number"><span class="supernatural-icon">🩸</span> 8</div>
@@ -6189,7 +6286,7 @@ But I hear the voices say
                 <span style="color:#d4c9a8; font-size:0.9em;">✅ <span id="finalDone">0</span> / <span id="finalTotal">5</span> tasks done</span>
                 <span style="color:#d4a060; font-size:0.9em;"><span id="finalPercent">0</span>%</span>
             </div>
-            <div style="width:100%; height:6px; background:rgba(20,18,15,0.5); border-ra        <img src="photo/Supernatural.jpg"dius:4px; margin-top:6px; overflow:hidden;">
+                        <div style="width:100%; height:6px; background:rgba(20,18,15,0.5); border-radius:4px; margin-top:6px; overflow:hidden;">
                 <div id="finalBarFill" style="height:100%; width:0%; background: linear-gradient(90deg, #8b3a2a, #d4a060); border-radius:4px; transition: width 0.5s ease;"></div>
             </div>
         </div>
