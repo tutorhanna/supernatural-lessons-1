@@ -65,9 +65,16 @@
 <body>
 
 <div id="game">
+  <audio id="bg-music" loop>
+    <source src="game/bg_music.mp3" type="audio/mpeg">
+  </audio>
   <div id="bg"></div>
-  
+
+
   <div id="stats">
+
+  <button id="music-toggle" onclick="toggleMusic()" style="position:absolute; top:-10px; right:-10px; background:#2d4a2a; color:#fff; border:1px solid #b8860b; border-radius:50%; width:30px; height:30px; cursor:pointer; font-size:14px;">🔇</button>
+ 
     <div class="stat fear"><span>😨 Fear:</span> <span id="fear-val">0</span></div>
     <div class="stat logic"><span>🧠 Logic:</span> <span id="logic-val">0</span></div>
     <div class="stat rage"><span>😡 Rage:</span> <span id="rage-val">0</span></div>
@@ -75,9 +82,13 @@
   </div>
   
   <div id="text-box" onclick="nextText()">
-    <span class="who" id="who"></span>
-    <span id="text"></span>
+  <div style="position:absolute; right: 30px; top: -50px; display:flex; gap:10px;">
+      <button id="btn-listen" onclick="event.stopPropagation(); speakText(document.getElementById('text').textContent, document.getElementById('who').textContent);" style="background:#2d4a2a; border:1px solid #b8860b; color:#b8860b; border-radius:20px; padding:6px 15px; cursor:pointer; font-family:inherit; font-size:0.8em; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">🔊 Listen</button>
+      <button id="btn-stop-speech" onclick="event.stopPropagation(); stopSpeech();" style="background:#2d4a2a; border:1px solid #c0392b; color:#c0392b; border-radius:20px; padding:6px 15px; cursor:pointer; font-family:inherit; font-size:0.8em; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">⏹ Stop</button>
   </div>
+  <span class="who" id="who"></span>
+  <span id="text"></span>
+</div>
   
   <div id="hint">💡 Space / → / Click to continue · ← to go back</div>
   
@@ -119,6 +130,46 @@
 <script>
 const IMG_PATH = 'game/images/';
 const SAVE_KEY = 'ravenwood_save_v2';
+// ===== ОЗВУЧКА =====
+let availableVoices = [];
+function loadVoices() {
+  availableVoices = window.speechSynthesis.getVoices();
+}
+window.speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function speakText(text, who) {
+  window.speechSynthesis.cancel();
+  if (!text) return;
+  
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.95; 
+  u.pitch = 1;   
+  
+  let goodVoice = availableVoices.find(v => v.name.includes('Google US English'));
+  
+  if (!goodVoice) {
+    goodVoice = availableVoices.find(v => v.lang === 'en-US' && !v.name.includes('Альберт') && !v.name.includes('Бах'));
+  }
+  
+  if (goodVoice) u.voice = goodVoice;
+  
+  if (who === 'Dean') {
+    u.rate = 0.9;
+    u.pitch = 0.95;
+  } 
+  else if (who === 'Mrs. Kline') {
+    u.rate = 0.85;
+    u.pitch = 1.1;
+  }
+  
+  window.speechSynthesis.speak(u);
+}
+
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+}
 
 let state = {
   fear: 0, logic: 0, rage: 0,
@@ -200,16 +251,32 @@ function renderCurrentText() {
   const item = state.currentTexts[state.currentTextIndex];
   if (item === undefined) return;
   ensureTextBox();
+  
+  let currentTextToSpeak = "";
+  let speakerName = "";
+
   if (typeof item === 'string') {
     document.getElementById('who').textContent = '';
     document.getElementById('text').textContent = item;
+    currentTextToSpeak = item;
   } else {
     document.getElementById('who').textContent = item.who || '';
     document.getElementById('text').textContent = item.text;
+    currentTextToSpeak = item.text;
+    speakerName = item.who || "";
   }
+  
   document.getElementById('btn-back').disabled = (state.currentTextIndex === 0);
+
+            // --- ОЗВУЧКА ---
+  stopSpeech();
+  // Автоматически читаем текст при появлении
+  speakText(currentTextToSpeak, speakerName);
 }
+
+
 function nextText() {
+  stopSpeech();
   if (document.getElementById('choices').style.display === 'flex') return;
   if (document.getElementById('text-box').style.display === 'none') return;
   if (state.currentTextIndex >= state.currentTexts.length - 1) {
@@ -1073,7 +1140,15 @@ scene('scene11', function() {
 //  СТАРТ
 // ============================================================
 function startNew() {
+  // Запускаем музыку при первом клике (браузеры это разрешают)
+  if (!musicPlaying) {
+    bgMusic.play().catch(e => console.log('Музыка не запустилась:', e));
+    musicToggle.textContent = '🎵';
+    musicPlaying = true;
+  }
+  
   localStorage.removeItem(SAVE_KEY);
+  
   state = {
     fear: 0, logic: 0, rage: 0,
     inventory: { photoOfSymbol: false, cameraFootage: false, fathersJournal: false, silverKnife: false, salt: false, gun: false, oldPhoto: false },
@@ -1599,6 +1674,26 @@ scene('episode2_placeholder', function() {
     saveGame();
   });
 });
+
+
+// ===== МУЗЫКА =====
+const bgMusic = document.getElementById('bg-music');
+const musicToggle = document.getElementById('music-toggle');
+let musicPlaying = false;
+
+function toggleMusic() {
+  if (musicPlaying) {
+    bgMusic.pause();
+    musicToggle.textContent = '🔇';
+    musicPlaying = false;
+  } else {
+    bgMusic.play();
+    musicToggle.textContent = '🎵';
+    musicPlaying = true;
+  }
+}
+
+
 
 </script>
 
