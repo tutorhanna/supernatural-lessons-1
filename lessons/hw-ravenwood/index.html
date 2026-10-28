@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ravenwood — The First Night</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Georgia', serif; background: #000; color: #fff; overflow: hidden; height: 100vh; }
+  #game { position: relative; width: 100vw; height: 100vh; background: #000; overflow: hidden; }
+  #bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transition: opacity 0.8s ease; z-index: 1; }
+  #stats { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0,0,0,0.75); padding: 15px 20px; border-radius: 8px; border-left: 4px solid #b8860b; font-family: 'Courier New', monospace; font-size: 14px; min-width: 200px; }
+  #stats .stat { margin: 4px 0; display: flex; justify-content: space-between; }
+  #stats .fear { color: #ff6b6b; } #stats .logic { color: #6bb8ff; } #stats .rage { color: #ffaa44; }
+  #stats .inv { margin-top: 10px; padding-top: 10px; border-top: 1px solid #444; color: #b8860b; font-size: 12px; line-height: 1.5; }
+  #text-box { position: absolute; bottom: 0; left: 0; width: 100%; min-height: 25%; background: rgba(0,0,0,0.88); padding: 30px 60px 70px 60px; z-index: 5; font-size: 20px; line-height: 1.6; cursor: pointer; border-top: 2px solid #2d4a2a; }
+  #text-box .who { color: #b8860b; font-weight: bold; font-size: 22px; margin-bottom: 8px; display: block; }
+  #controls { position: absolute; bottom: 15px; right: 30px; z-index: 15; display: flex; gap: 10px; }
+  #controls button { background: #2d4a2a; color: #fff; border: 2px solid #1a3a1a; padding: 10px 20px; font-size: 15px; border-radius: 6px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  #controls button:hover { background: #b8860b; color: #000; border-color: #b8860b; }
+  #controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #hint { position: absolute; bottom: 20px; left: 30px; color: #888; font-size: 14px; z-index: 15; font-style: italic; }
+  #choices { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; display: none; flex-direction: column; gap: 15px; width: 80%; max-width: 800px; }
+  #choices .choice { background: #2d4a2a; border: 2px solid #1a3a1a; padding: 20px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1.5; transition: all 0.3s; color: #fff; }
+  #choices .choice:hover { background: #1a3a1a; border-color: #b8860b; transform: scale(1.02); }
+  #grammar-overlay, #exercise-overlay, #start-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 100; display: none; align-items: center; justify-content: center; }
+  #grammar-box { background: #1a3a1a; border: 3px solid #b8860b; border-radius: 10px; padding: 40px 50px; max-width: 700px; text-align: center; }
+  #grammar-box .label { color: #b8860b; font-size: 24px; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; }
+  #grammar-box .text { color: #fff; font-size: 20px; line-height: 1.6; margin-bottom: 25px; }
+  #grammar-box .btn { background: #b8860b; color: #000; border: none; padding: 12px 40px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+  #exercise-box { background: #1a1a2a; border: 3px solid #6bb8ff; border-radius: 10px; padding: 40px 50px; max-width: 850px; max-height: 90vh; overflow-y: auto; }
+  #exercise-box .label { color: #6bb8ff; font-size: 22px; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; }
+  #exercise-box .question { color: #fff; font-size: 20px; line-height: 1.7; margin-bottom: 25px; }
+  #exercise-box .question .blank { color: #b8860b; font-weight: bold; font-size: 22px; }
+  #exercise-box .options { display: flex; flex-direction: column; gap: 12px; }
+  #exercise-box .option { background: #2a2a3a; border: 2px solid #444; padding: 15px 25px; border-radius: 6px; cursor: pointer; font-size: 18px; color: #fff; text-align: left; }
+  #exercise-box .option:hover { background: #3a3a4a; border-color: #6bb8ff; }
+  #exercise-box .option.correct { background: #1a4a2a; border-color: #4aff88; color: #4aff88; }
+  #exercise-box .option.wrong { background: #4a1a1a; border-color: #ff4a4a; color: #ff4a4a; }
+  #exercise-box .feedback { margin-top: 20px; padding: 20px; border-radius: 6px; font-size: 16px; line-height: 1.7; display: none; }
+  #exercise-box .feedback.correct { background: rgba(74,255,136,0.1); border-left: 4px solid #4aff88; color: #d0ffe0; }
+  #exercise-box .feedback.wrong { background: rgba(255,74,74,0.1); border-left: 4px solid #ff4a4a; color: #ffd0d0; }
+  #exercise-box .feedback .head { font-size: 19px; font-weight: bold; display: block; margin-bottom: 10px; }
+  #exercise-box .feedback.correct .head { color: #4aff88; }
+  #exercise-box .feedback.wrong .head { color: #ff4a4a; }
+  #exercise-box .feedback .answer-line { color: #b8860b; font-weight: bold; font-size: 18px; display: block; margin: 12px 0; padding: 10px; background: rgba(184,134,11,0.15); border-radius: 4px; }
+  #exercise-box .feedback strong { color: #ffaa44; }
+  #exercise-box .feedback em { color: #6bb8ff; font-style: normal; }
+  #exercise-box .continue-btn { margin-top: 20px; background: #6bb8ff; color: #000; border: none; padding: 12px 40px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; display: none; }
+  #exercise-box .continue-btn:hover { background: #8bc8ff; }
+  #start-overlay { display: flex; }
+  #start-box { background: #1a1a2a; border: 3px solid #b8860b; border-radius: 10px; padding: 50px 70px; text-align: center; max-width: 600px; }
+  #start-box h1 { color: #b8860b; font-size: 36px; margin-bottom: 20px; letter-spacing: 3px; }
+  #start-box p { color: #ccc; font-size: 18px; margin-bottom: 30px; line-height: 1.6; }
+  #start-box button { display: block; width: 100%; margin: 10px 0; padding: 15px; font-size: 18px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; letter-spacing: 1px; transition: all 0.2s; }
+  #start-box .btn-continue { background: #2d4a2a; color: #fff; border: 2px solid #1a3a1a; }
+  #start-box .btn-continue:hover { background: #b8860b; color: #000; border-color: #b8860b; }
+  #start-box .btn-new { background: transparent; color: #b8860b; border: 2px solid #b8860b; }
+  #start-box .btn-new:hover { background: #b8860b; color: #000; }
+  .stat-change { position: absolute; top: 120px; left: 20px; z-index: 15; font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; opacity: 0; transition: all 1s ease; pointer-events: none; }
+  .stat-change.show { opacity: 1; transform: translateY(-25px); }
+  .stat-change.fear { color: #ff6b6b; } .stat-change.logic { color: #6bb8ff; } .stat-change.rage { color: #ffaa44; }
+</style>
+</head>
+<body>
+
+<div id="game">
+  <audio id="bg-music" loop>
+    <source src="game/bg_music.mp3" type="audio/mpeg">
+  </audio>
+  <div id="bg"></div>
+
+
+  <div id="stats">
+
+  <button id="music-toggle" onclick="toggleMusic()" style="position:absolute; top:-10px; right:-10px; background:#2d4a2a; color:#fff; border:1px solid #b8860b; border-radius:50%; width:30px; height:30px; cursor:pointer; font-size:14px;">🔇</button>
+ 
+    <div class="stat fear"><span>😨 Fear:</span> <span id="fear-val">0</span></div>
+    <div class="stat logic"><span>🧠 Logic:</span> <span id="logic-val">0</span></div>
+    <div class="stat rage"><span>😡 Rage:</span> <span id="rage-val">0</span></div>
+    <div class="inv" id="inventory">📦 Inventory: empty</div>
+  </div>
+  
+  <div id="text-box" onclick="nextText()">
+  <div style="position:absolute; right: 30px; top: -50px; display:flex; gap:10px;">
+      <button id="btn-listen" onclick="event.stopPropagation(); speakText(document.getElementById('text').textContent, document.getElementById('who').textContent);" style="background:#2d4a2a; border:1px solid #b8860b; color:#b8860b; border-radius:20px; padding:6px 15px; cursor:pointer; font-family:inherit; font-size:0.8em; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">🔊 Listen</button>
+      <button id="btn-stop-speech" onclick="event.stopPropagation(); stopSpeech();" style="background:#2d4a2a; border:1px solid #c0392b; color:#c0392b; border-radius:20px; padding:6px 15px; cursor:pointer; font-family:inherit; font-size:0.8em; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">⏹ Stop</button>
+  </div>
+  <span class="who" id="who"></span>
+  <span id="text"></span>
+</div>
+  
+  <div id="hint">💡 Space / → / Click to continue · ← to go back</div>
+  
+  <div id="controls">
+    <button id="btn-back" onclick="goBack()">← Back</button>
+    <button id="btn-next" onclick="nextText()">Next →</button>
+  </div>
+  
+  <div id="choices"></div>
+  
+  <div id="grammar-overlay">
+    <div id="grammar-box">
+      <div class="label">💡 GRAMMAR HINT</div>
+      <div class="text" id="grammar-text"></div>
+      <button class="btn" onclick="closeGrammar()">Continue</button>
+    </div>
+  </div>
+  
+  <div id="exercise-overlay">
+    <div id="exercise-box">
+      <div class="label">📝 GRAMMAR CHECK</div>
+      <div class="question" id="ex-question"></div>
+      <div class="options" id="ex-options"></div>
+      <div class="feedback" id="ex-feedback"></div>
+      <button class="continue-btn" id="ex-continue" onclick="closeExercise()">Continue →</button>
+    </div>
+  </div>
+  
+  <div id="start-overlay">
+    <div id="start-box">
+      <h1>🩸 RAVENWOOD</h1>
+      <p>The First Night</p>
+      <button class="btn-continue" id="btn-continue" onclick="continueGame()" style="display:none;">▶ Continue</button>
+      <button class="btn-new" onclick="startNew()">🩸 New Game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const IMG_PATH = 'game/images/';
+const SAVE_KEY = 'ravenwood_save_v2';
+// ===== ОЗВУЧКА =====
+let availableVoices = [];
+function loadVoices() {
+  availableVoices = window.speechSynthesis.getVoices();
+}
+window.speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function speakText(text, who) {
+  window.speechSynthesis.cancel();
+  if (!text) return;
+  
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.95; 
+  u.pitch = 1;   
+  
+  let goodVoice = availableVoices.find(v => v.name.includes('Google US English'));
+  
+  if (!goodVoice) {
+    goodVoice = availableVoices.find(v => v.lang === 'en-US' && !v.name.includes('Альберт') && !v.name.includes('Бах'));
+  }
+  
+  if (goodVoice) u.voice = goodVoice;
+  
+  if (who === 'Dean') {
+    u.rate = 0.9;
+    u.pitch = 0.95;
+  } 
+  else if (who === 'Mrs. Kline') {
+    u.rate = 0.85;
+    u.pitch = 1.1;
+  }
+  
+  window.speechSynthesis.speak(u);
+}
+
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+}
+
+let state = {
+  fear: 0, logic: 0, rage: 0,
+  inventory: { photoOfSymbol: false, cameraFootage: false, fathersJournal: false, silverKnife: false, salt: false, gun: false, oldPhoto: false },
+  currentTexts: [],
+  currentTextIndex: 0,
+  currentSceneAfterTexts: null,
+  history: [],
+  currentSceneName: 'start'
+};
+
+function saveGame() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      fear: state.fear, logic: state.logic, rage: state.rage,
+      inventory: state.inventory,
+      sceneName: state.currentSceneName,
+      textIndex: state.currentTextIndex
+    }));
+  } catch(e) {}
+}
+function loadSave() {
+  try { const raw = localStorage.getItem(SAVE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+}
+function hasSave() { return loadSave() !== null; }
+
+function updateStats() {
+  document.getElementById('fear-val').textContent = state.fear;
+  document.getElementById('logic-val').textContent = state.logic;
+  document.getElementById('rage-val').textContent = state.rage;
+  const inv = [];
+  if (state.inventory.photoOfSymbol) inv.push('📷 Symbol');
+  if (state.inventory.cameraFootage) inv.push('📼 Footage');
+  if (state.inventory.fathersJournal) inv.push('📓 Journal');
+  if (state.inventory.silverKnife) inv.push('🗡 Knife');
+  if (state.inventory.salt) inv.push('🧂 Salt');
+  if (state.inventory.gun) inv.push('🔫 Gun');
+  if (state.inventory.oldPhoto) inv.push('🖼 Photo');
+  document.getElementById('inventory').textContent = '📦 ' + (inv.length ? inv.join(' · ') : 'empty');
+}
+function showStatChange(type, amount) {
+  const el = document.createElement('div');
+  el.className = 'stat-change ' + type + ' show';
+  el.textContent = (amount > 0 ? '+' : '') + amount + ' ' + type.toUpperCase();
+  document.getElementById('game').appendChild(el);
+  setTimeout(() => el.classList.remove('show'), 100);
+  setTimeout(() => el.remove(), 1500);
+}
+function changeStat(type, amount) {
+  state[type] += amount;
+  updateStats();
+  showStatChange(type, amount);
+}
+function setBg(imageName) {
+  document.getElementById('bg').style.backgroundImage = 'url("' + IMG_PATH + imageName + '")';
+}
+
+function ensureTextBox() {
+  const tb = document.getElementById('text-box');
+  // Если предыдущий экран перезаписал innerHTML (конец эпизода) и удалил структуру,
+  // восстанавливаем стандартные элементы #who и #text
+  if (!document.getElementById('who') || !document.getElementById('text')) {
+    tb.innerHTML = '<span class="who" id="who"></span><span id="text"></span>';
+  }
+}
+function showText(texts, nextScene) {
+  state.currentTexts = texts;
+  state.currentTextIndex = 0;
+  state.currentSceneAfterTexts = nextScene;
+  ensureTextBox();
+  document.getElementById('choices').style.display = 'none';
+  document.getElementById('text-box').style.display = 'block';
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('hint').style.display = 'block';
+  renderCurrentText();
+  saveGame();
+}
+function renderCurrentText() {
+  const item = state.currentTexts[state.currentTextIndex];
+  if (item === undefined) return;
+  ensureTextBox();
+  
+  let currentTextToSpeak = "";
+  let speakerName = "";
+
+  if (typeof item === 'string') {
+    document.getElementById('who').textContent = '';
+    document.getElementById('text').textContent = item;
+    currentTextToSpeak = item;
+  } else {
+    document.getElementById('who').textContent = item.who || '';
+    document.getElementById('text').textContent = item.text;
+    currentTextToSpeak = item.text;
+    speakerName = item.who || "";
+  }
+  
+  document.getElementById('btn-back').disabled = (state.currentTextIndex === 0);
+
+            // --- ОЗВУЧКА ---
+  stopSpeech();
+  // Автоматически читаем текст при появлении
+  speakText(currentTextToSpeak, speakerName);
+}
+
+
+function nextText() {
+  stopSpeech();
+  if (document.getElementById('choices').style.display === 'flex') return;
+  if (document.getElementById('text-box').style.display === 'none') return;
+  if (state.currentTextIndex >= state.currentTexts.length - 1) {
+    document.getElementById('text-box').style.display = 'none';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('hint').style.display = 'none';
+    if (state.currentSceneAfterTexts) {
+      const fn = state.currentSceneAfterTexts;
+      state.currentSceneAfterTexts = null;
+      fn();
+    }
+  } else {
+    state.currentTextIndex++;
+    renderCurrentText();
+    saveGame();
+  }
+}
+function goBack() {
+  if (state.currentTextIndex > 0) {
+    state.currentTextIndex--;
+    renderCurrentText();
+    saveGame();
+  }
+}
+
+function showChoices(question, options) {
+  state.history.push(state.currentSceneName);
+  const box = document.getElementById('choices');
+  box.innerHTML = '';
+  box.style.display = 'flex';
+  document.getElementById('controls').style.display = 'none';
+  document.getElementById('hint').style.display = 'none';
+  const q = document.createElement('div');
+  q.style.cssText = 'text-align:center;color:#b8860b;font-size:22px;margin-bottom:10px;background:rgba(0,0,0,0.85);padding:15px;border-radius:8px;';
+  q.textContent = question;
+  box.appendChild(q);
+  options.forEach(opt => {
+    const btn = document.createElement('div');
+    btn.className = 'choice';
+    btn.textContent = opt.text;
+    btn.onclick = () => { box.style.display = 'none'; opt.action(); };
+    box.appendChild(btn);
+  });
+}
+
+let grammarCallback = null;
+function showGrammar(text, callback) {
+  document.getElementById('grammar-text').textContent = text;
+  document.getElementById('grammar-overlay').style.display = 'flex';
+  grammarCallback = callback;
+}
+function closeGrammar() {
+  document.getElementById('grammar-overlay').style.display = 'none';
+  if (grammarCallback) { const cb = grammarCallback; grammarCallback = null; cb(); }
+}
+
+let exerciseCallback = null;
+function showExercise(question, options, correctIndex, explanation, callback) {
+  document.getElementById('ex-question').innerHTML = question;
+  const optsBox = document.getElementById('ex-options');
+  const fb = document.getElementById('ex-feedback');
+  const cont = document.getElementById('ex-continue');
+  optsBox.innerHTML = '';
+  fb.style.display = 'none';
+  fb.className = 'feedback';
+  cont.style.display = 'none';
+  let answered = false;
+  options.forEach((opt, idx) => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => {
+      if (answered) return;
+      answered = true;
+      const allOpts = optsBox.querySelectorAll('.option');
+      if (idx === correctIndex) {
+        btn.classList.add('correct');
+        fb.className = 'feedback correct';
+        fb.innerHTML = '<span class="head">✅ Correct!</span>' + explanation;
+      } else {
+        btn.classList.add('wrong');
+        allOpts[correctIndex].classList.add('correct');
+        fb.className = 'feedback wrong';
+        fb.innerHTML = '<span class="head">❌ Not quite.</span><span class="answer-line">Correct answer: ' + options[correctIndex] + '</span>' + explanation;
+      }
+      fb.style.display = 'block';
+      cont.style.display = 'inline-block';
+    };
+    optsBox.appendChild(btn);
+  });
+  document.getElementById('exercise-overlay').style.display = 'flex';
+  exerciseCallback = callback;
+}
+function closeExercise() {
+  document.getElementById('exercise-overlay').style.display = 'none';
+  if (exerciseCallback) { const cb = exerciseCallback; exerciseCallback = null; cb(); }
+}
+
+function scene(name, fn) {
+  scenes[name] = function() {
+    state.currentSceneName = name;
+    saveGame();
+    fn();
+  };
+}
+
+const scenes = {};
+
+// ============================================================
+//  SCENE START
+// ============================================================
+scene('start', function() {
+  setBg('car_interior.jpg');
+  showText([
+    "The highway stretches ahead, endless and dark. Three hours from the city back to Ravenwood.",
+    "You've been driving for two hours. Your hands are tight on the wheel. Your mind keeps replaying the same four words: four days of silence.",
+    "Four days. No calls. No texts. No 'we're fine, just busy.' Just... nothing.",
+    "And then, as if the radio knew — the song starts playing. 'Carry On Wayward Son.' Dad's song. The one he always played on long drives when you were a kid, half-asleep in the back seat.",
+    "You haven't heard it in years. And now, tonight, on this empty road — it feels like a sign."
+  ], () => {
+    showChoices("What do you do with the radio?", [
+      { text: "You let it play. It's Dad's song. It feels like he's here.", action: () => { changeStat('fear', 1); changeStat('logic', 1); scenes.scene1_play(); } },
+      { text: "You turn it off. It hurts too much.", action: () => { changeStat('rage', 1); scenes.scene1_off(); } },
+      { text: "You sing along. Your eyes fill with tears.", action: () => { changeStat('fear', 1); scenes.scene1_sing(); } }
+    ]);
+  });
+});
+
+scene('scene1_play', function() {
+  setBg('Song_in_car.jpg');
+  showText([
+    "You let the song play. The guitar fills the car. For a moment, you feel like your father is sitting next to you.",
+    {who: "You", text: "I'm coming, Dad. I'm coming."},
+    "Your hands stop shaking."
+  ], () => {
+    showGrammar("Past Simple: 'You let it play. Your hands stopped shaking.' — завершённые действия в прошлом.", () => {
+      showExercise(
+        "Complete the sentence (Past Simple vs Past Continuous):<br><br>The song <span class='blank'>___</span> when your hands <span class='blank'>___</span> to shake.",
+        ["was playing · stopped", "played · were stopping", "was playing · were stopping"],
+        0,
+        "<strong>was playing</strong> — Past Continuous: <em>фоновое действие</em> (песня играла в тот момент).<br><br><strong>stopped</strong> — Past Simple: <em>короткое завершённое действие</em> (руки перестали трястись — это случилось).<br><br><strong>Почему не другие:</strong><br>• «played» — неверно, потому что песня <em>играла в процессе</em>, а не просто «играла когда-то».<br>• «were stopping» — неверно, потому что «перестать трястись» — это <em>мгновенное действие</em>, а Past Continuous — для длительных.<br>• «was playing · were stopping» — та же ошибка.",
+        () => scenes.scene2()
+      );
+    });
+  });
+});
+
+scene('scene1_off', function() {
+  setBg('Song_in_car.jpg');
+  showText([
+    "You turn it off. The silence is worse. The road feels darker. But the anger keeps you awake.",
+    {who: "You", text: "Why didn't you tell me anything?"},
+    "You press the gas pedal harder."
+  ], () => {
+    showGrammar("Past Simple: 'You turned it off. The silence was worse.' — короткие завершённые действия.", () => {
+      showExercise(
+        "Complete the sentence (Past Simple):<br><br>You <span class='blank'>___</span> the radio off. The silence <span class='blank'>___</span> worse than the song.",
+        ["turned · was", "was turning · were", "turned · were"],
+        0,
+        "<strong>turned</strong> — Past Simple: <em>завершённое действие</em> (ты выключил — факт).<br><br><strong>was</strong> — Past Simple глагола <em>be</em>: <em>состояние в прошлом</em> (тишина <em>была</em> хуже).<br><br><strong>Почему не другие:</strong><br>• «was turning» — неверно, ты не «выключал в процессе», ты просто <em>выключил</em>.<br>• «were» — неверно, потому что «silence» — неисчисляемое существительное в единственном числе, поэтому <em>was</em>, а не <em>were</em>.",
+        () => scenes.scene2()
+      );
+    });
+  });
+});
+
+scene('scene1_sing', function() {
+  setBg('Song_in_car.jpg');
+  showText([
+    "You sing along, your voice cracking. Tears run down your face, but you don't wipe them away.",
+    {who: "You", text: "Carry on, my wayward son..."},
+    "It feels like a goodbye. And a promise."
+  ], () => {
+    showGrammar("Past Continuous: 'Tears were running down your face.' — фоновое действие в момент речи.", () => {
+      showExercise(
+        "Complete the sentence (Past Continuous):<br><br>While you <span class='blank'>___</span> along, tears <span class='blank'>___</span> down your face.",
+        ["were singing · were running", "sang · ran", "was singing · was running"],
+        0,
+        "<strong>were singing · were running</strong> — оба глагола в Past Continuous: <em>два длительных действия происходили одновременно</em>.<br><br><strong>Почему не другие:</strong><br>• «sang · ran» — неверно, потому что действия <em>длились</em>, а не были короткими.<br>• «was singing · was running» — неверно, потому что подлежащее <em>you</em> (ты) требует <em>were</em>, а не <em>was</em>. «Tears» — множественное число, тоже <em>were</em>.",
+        () => scenes.scene2()
+      );
+    });
+  });
+});
+
+// ============================================================
+//  SCENE 2
+// ============================================================
+scene('scene2', function() {
+  setBg('Welcome_to_Ravenwood.jpg');
+  showText([
+    "The 'Welcome to Ravenwood' sign appears in your headlights. Population: 2,100.",
+    "The same sign you've seen a hundred times. The same rusty metal. The same peeling paint.",
+    "But tonight, it doesn't feel like home. It feels like a warning.",
+    "You drive past it. Slowly.",
+    "The road into town is empty. No cars. No people. Just the dark fields on both sides and the enormous sky above."
+  ], () => {
+    showExercise(
+      "Complete the sentence (Present Simple vs Present Continuous):<br><br>Right now, you <span class='blank'>___</span> past the sign. Every time you <span class='blank'>___</span> home, the sign looks the same.",
+      ["are driving · drive", "drive · are driving", "are driving · are driving"],
+      0,
+      "<strong>are driving</strong> — Present Continuous: <em>действие происходит прямо сейчас</em> (в этот момент).<br><br><strong>drive</strong> — Present Simple: <em>регулярное, повторяющееся действие</em> (каждый раз, когда ты едешь домой).<br><br><strong>Почему не другие:</strong><br>• «drive · are driving» — перепутаны местами: «прямо сейчас» → Continuous, «каждый раз» → Simple.<br>• «are driving · are driving» — неверно, потому что «every time» указывает на <em>регулярность</em>, а это Present Simple.",
+      () => scenes.scene2b()
+    );
+  });
+});
+
+// ============================================================
+//  SCENE 2b
+// ============================================================
+scene('scene2b', function() {
+  setBg('kansas_road.jpg');
+  showText([
+    "Main Street is empty. The diner is closed. The gas station is dark. Even the church looks abandoned.",
+    "You slow down. Your heart is pounding. You know every street here. Every shortcut. Every hiding place.",
+    "You know which neighbours have dogs. Which ones sleep late. Which ones keep their porch light on all night.",
+    "And you know one thing for sure: your parents' porch light is never off. Never."
+  ], () => {
+    showChoices("Where do you go first?", [
+      { text: "Straight to your parents' house. You can't wait any longer.", action: () => { changeStat('logic', 1); scenes.scene2b_home(); } },
+      { text: "To the gas station. The tank is almost empty — you have no choice.", action: () => { changeStat('fear', 1); scenes.scene2c(); } }
+    ]);
+  });
+});
+
+scene('scene2b_home', function() {
+  setBg('kansas_road.jpg');
+  showText([
+    "You turn toward Cedar Street. Your parents' house is only five minutes away. Five minutes, and you'll know.",
+    "You press the gas. The car surges forward.",
+    "And then — the dashboard light flicks on. Orange. A small icon of a fuel pump.",
+    "You glance at the gauge. The needle is below empty. Almost touching the red line.",
+    {who: "You", text: "You've got to be kidding me."},
+    "You can't make it to Cedar Street and back on this. You can't make it anywhere on this.",
+    "You curse under your breath. Then you turn the wheel. The gas station is two blocks back.",
+    "Five minutes. Just five minutes. Then you'll be at the house."
+  ], () => {
+    showExercise(
+      "Complete the sentence (Past Simple):<br><br>You <span class='blank'>___</span> the wheel and <span class='blank'>___</span> toward the gas station.",
+      ["turned · drove", "were turning · were driving", "turn · drive"],
+      0,
+      "<strong>turned · drove</strong> — Past Simple: <em>цепочка завершённых действий</em> в прошлом.<br><br><strong>Почему не другие:</strong><br>• «were turning · were driving» — неверно, потому что это <em>короткие завершённые действия</em> (повернул и поехал), а не длительные.<br>• «turn · drive» — неверно, потому что это <em>настоящее время</em>, а история происходит в прошлом.",
+      () => scenes.scene2c()
+    );
+  });
+});
+
+scene('scene2c', function() {
+  setBg('gas_station.jpg');
+  showText([
+    "You pull into the gas station. It's open — barely. One light on, an old man sitting outside on a bench, smoking.",
+    "You don't talk to him. You just fill the tank. The numbers on the pump click by slowly.",
+    "The old man watches you. He doesn't say anything. Neither do you.",
+    "You pay at the machine. You get back in the car.",
+    "As you pull away, you glance in the rearview mirror. The old man is still sitting there. Still watching.",
+    {who: "You", text: "Just a gas station. Just a normal night."},
+    "You don't believe it. But you say it anyway."
+  ], () => {
+    showExercise(
+      "Complete the sentence (Past Simple):<br><br>You <span class='blank'>___</span> the tank, <span class='blank'>___</span> at the machine, and <span class='blank'>___</span> back in the car.",
+      ["filled · paid · got", "were filling · were paying · were getting", "fill · pay · get"],
+      0,
+      "<strong>filled · paid · got</strong> — Past Simple: <em>три завершённых действия</em>, которые произошли одно за другим.<br><br><strong>Почему не другие:</strong><br>• «were filling · were paying · were getting» — неверно, эти действия <em>завершены</em>, а не длились одновременно.<br>• «fill · pay · get» — неверно, это <em>настоящее время</em>, а рассказ в прошлом.",
+      () => scenes.scene3()
+    );
+  });
+});
+
+// ============================================================
+//  SCENE 3
+// ============================================================
+scene('scene3', function() {
+  setBg('house_night.jpg');
+  showText([
+    "You park in front of your parents' house. The porch light is off. The front door is slightly open.",
+    "You sit in the car for a long moment. Your hands are gripping the wheel so hard your knuckles are white.",
+    "The house you were born in. The house where you learned to walk. The house where you first heard 'Carry On Wayward Son.'",
+    "And now — the door is open. And nobody is home.",
+    {who: "You", text: "Okay. Okay. You can do this."},
+    "You step out of the car. The night air is cold. The stars are enormous. And the silence is... wrong. Too quiet. Like the whole world is holding its breath."
+  ], () => {
+    showChoices("How do you enter the house?", [
+      { text: "Quietly. Listening. Every sound could be something.", action: () => { changeStat('logic', 1); scenes.scene4(); } },
+      { text: "You call out: 'Mom? Dad?' — you can't help it.", action: () => { changeStat('fear', 1); scenes.scene4(); } },
+      { text: "You take out your phone, turn on the flashlight, and step inside.", action: () => { changeStat('logic', 1); scenes.scene4(); } }
+    ]);
+  });
+});
+
+// ============================================================
+//  SCENE 4
+// ============================================================
+scene('scene4', function() {
+  setBg('living_room.jpg');
+  showText([
+    "You step inside. And your heart stops.",
+    "The living room is destroyed. Chairs overturned. A lamp broken on the floor. Drawers pulled out, their contents scattered everywhere. Glass crunching under your feet.",
+    "But it's not the mess that makes your blood run cold.",
+    "It's the symbol on the wall. Painted in something dark red. Curved lines. Dots. Like Arabic writing, but... not. You don't recognize it. But it makes your skin crawl.",
+    {who: "You", text: "Mom? Dad?"},
+    "No answer. Just the sound of your own breathing.",
+    "You stand there, frozen. And then — on instinct — your hand moves to your pocket. Your phone."
+  ], () => {
+    showChoices("What do you do with the symbol?", [
+      { text: "You take out your phone and photograph it. Your hands are shaking, but you do it.", action: () => { state.inventory.photoOfSymbol = true; updateStats(); changeStat('logic', 1); changeStat('fear', 1); scenes.scene4_photo(); } },
+      { text: "You reach out to touch it. You need to know if the paint is still wet.", action: () => { state.inventory.photoOfSymbol = true; updateStats(); changeStat('fear', 2); changeStat('logic', -1); scenes.scene4_touch(); } },
+      { text: "You turn away. You can't look at it. You feel sick.", action: () => { state.inventory.photoOfSymbol = true; updateStats(); changeStat('fear', 1); changeStat('logic', -1); scenes.scene4_turn(); } }
+    ]);
+  });
+});
+
+scene('scene4_photo', function() {
+  setBg('living_room.jpg');
+  showText([
+    "You snap three photos. The flash lights up the room for a second — and for that second, the symbol looks even worse.",
+    "You stare at the screen. The symbol stares back.",
+    {who: "You", text: "What are you?"},
+    "You don't know why, but you feel like you'll need this photo later."
+  ], () => {
+    showGrammar("Past Simple: 'You snapped three photos. The symbol stared back.' — завершённые действия.", () => {
+      showExercise(
+        "Complete the sentence (Past Simple):<br><br>You <span class='blank'>___</span> three photos and <span class='blank'>___</span> at the screen.",
+        ["snapped · stared", "were snapping · were staring", "snap · stare"],
+        0,
+        "<strong>snapped · stared</strong> — Past Simple: <em>два завершённых действия</em>, произошедших одно за другим.<br><br><strong>Почему не другие:</strong><br>• «were snapping · were staring» — неверно: ты <em>сделал</em> фото (завершённое действие), а не делал его в процессе.<br>• «snap · stare» — неверно: это настоящее время, а история в прошлом.",
+        () => scenes.scene5()
+      );
+    });
+  });
+});
+
+scene('scene4_touch', function() {
+  setBg('living_room.jpg');
+  showText([
+    "Your fingers touch the dark red paint. It's dry. But the moment your skin makes contact — you feel it. A cold shock, like static electricity, running up your arm.",
+    "You pull your hand back. Your heart is racing. And then — without thinking — you wipe your hand on your jeans and take out your phone.",
+    "You photograph the symbol. Your hands are shaking so badly you almost drop the phone.",
+    {who: "You", text: "What the hell...?"},
+    "You don't know why you took the photo. But you did."
+  ], () => {
+    showGrammar("Past Continuous: 'Your hands were shaking when you took the photo.' — действие в момент, когда что-то произошло.", () => {
+      showExercise(
+        "Complete the sentence (Past Continuous):<br><br>Your hands <span class='blank'>___</span> when you <span class='blank'>___</span> the photo.",
+        ["were shaking · took", "shook · were taking", "was shaking · took"],
+        0,
+        "<strong>were shaking</strong> — Past Continuous: <em>длительное действие</em> в момент в прошлом. <em>Hands</em> — множественное число, поэтому <em>were</em>.<br><br><strong>took</strong> — Past Simple: <em>короткое завершённое действие</em>, которое произошло в этот момент.<br><br><strong>Почему не другие:</strong><br>• «shook · were taking» — перепутано: тряслись руки <em>долго</em> (Continuous), а фото ты <em>сделал</em> (Simple).<br>• «was shaking» — неверно: <em>hands</em> множественное число, поэтому <em>were</em>, не <em>was</em>.",
+        () => scenes.scene5()
+      );
+    });
+  });
+});
+
+scene('scene4_turn', function() {
+  setBg('living_room.jpg');
+  showText([
+    "You turn away. Your stomach turns. For a second, you think you're going to be sick.",
+    "You close your eyes. Breathe. Count to five.",
+    "And then — you open your eyes, take out your phone, and photograph the symbol anyway. You don't know why. Maybe because your father always said: 'Evidence first. Panic later.'",
+    "You snap the photo. Then you turn away again."
+  ], () => {
+    showGrammar("Past Simple vs Past Continuous: 'You turned away. You were shaking, but you took the photo.'", () => {
+      showExercise(
+        "Complete the sentence (Past Simple vs Past Continuous):<br><br>You <span class='blank'>___</span> away, but your hands <span class='blank'>___</span> — yet you <span class='blank'>___</span> the photo anyway.",
+        ["turned · were shaking · took", "were turning · shook · were taking", "turned · shook · were taking"],
+        0,
+        "<strong>turned</strong> — Past Simple: <em>короткое завершённое действие</em>.<br><br><strong>were shaking</strong> — Past Continuous: <em>фоновое длительное состояние</em>.<br><br><strong>took</strong> — Past Simple: <em>завершённое действие</em>.<br><br><strong>Почему не другие:</strong><br>• «were turning · shook · were taking» — все три неверно: поворот и фото — короткие действия (Simple), а тряска рук — длительное (Continuous).<br>• «turned · shook · were taking» — неверно только последнее: ты <em>сделал</em> фото (Simple), а не делал в процессе.",
+        () => scenes.scene5()
+      );
+    });
+  });
+});
+
+// ============================================================
+//  SCENE 5
+// ============================================================
+scene('scene5', function() {
+  
+setBg('cabinet.jpg');  
+  showText([
+    "You need to know what happened. You remember: your father installed security cameras last year. Small ones. One in the living room, one outside.",
+    "You go to his office. The computer is still on. The screen is dark, but the little light is blinking.",
+    "You sit down. Your fingers find the keyboard. You open the camera app. You rewind.",
+    "2:40 AM. Nothing. 2:45 AM. Nothing. 2:47 AM.",
+    "And there it is.",
+    "On the screen: a dark figure. Tall. Blurred. Its shape almost human — but not quite. Too long. Too thin. It moves wrong.",
+    "It's dragging two bodies out the back door.",
+    "2:47 AM. Three nights ago. The same night your parents stopped answering their phones.",
+    "Then the footage stops. Just... stops.",
+    {who: "You", text: "What the hell...?"}
+  ], () => {
+    showChoices("What do you do?", [
+      { text: "You watch it again. And again. You need every detail.", action: () => { state.inventory.cameraFootage = true; updateStats(); changeStat('logic', 2); scenes.scene5_watch(); } },
+      { text: "You can't watch it again. You feel sick. You save the file and close the laptop.", action: () => { state.inventory.cameraFootage = true; updateStats(); changeStat('fear', 1); scenes.scene5_close(); } },
+      { text: "You slam your fist on the desk. You want to break something.", action: () => { state.inventory.cameraFootage = true; updateStats(); changeStat('rage', 2); scenes.scene5_rage(); } }
+    ]);
+  });
+});
+
+scene('scene5_watch', function() {
+  setBg('camera_room2.jpg');
+  showText([
+    "You rewind. You watch it again. And again. And again. Five times. Ten times.",
+    "You pause the frame. You zoom in. You study the figure: its height, its shape, the way it moves.",
+    "You don't know what it is. But you know one thing: it's not human. And it took your parents.",
+    "You save the file to a USB drive. You put the drive in your pocket.",
+    {who: "You", text: "I'll find you. I swear to God, I'll find you."}
+  ], () => {
+    showExercise(
+      "Complete the sentence (Present Perfect):<br><br>You <span class='blank'>___</span> the footage ten times, and you <span class='blank'>___</span> the file on a USB drive.",
+      ["have watched · have saved", "watched · saved", "are watching · are saving"],
+      0,
+      "<strong>have watched · have saved</strong> — Present Perfect: <em>результат важен сейчас</em> (ты посмотрел — и результат: знаешь, что это не человек; ты сохранил — и результат: файл у тебя).<br><br><strong>Почему не другие:</strong><br>• «watched · saved» — Past Simple тоже возможно, но <em>Present Perfect</em> подчёркивает <em>связь с настоящим</em>: ты знаешь то, что знаешь <em>сейчас</em>.<br>• «are watching · are saving» — неверно: это <em>процесс сейчас</em>, а не результат.",
+      () => scenes.scene6()
+    );
+  });
+});
+
+scene('scene5_close', function() {
+  setBg('camera_room2.jpg');
+  showText([
+    "You can't watch it again. The image is burned into your mind. You save the file, close the laptop, and press your hands to your face.",
+    "You sit there for a long minute. Then you stand up. You put the USB drive in your pocket.",
+    {who: "You", text: "Okay. Okay. Think. What would Dad do?"}
+  ], () => {
+    showExercise(
+      "Complete the sentence (Present Perfect):<br><br>You <span class='blank'>___</span> the file. You <span class='blank'>___</span> it in your pocket.",
+      ["have saved · have put", "saved · put", "are saving · are putting"],
+      0,
+      "<strong>have saved · have put</strong> — Present Perfect: <em>действия завершены, результат важен сейчас</em> (файл у тебя в кармане — вот результат).<br><br><strong>Почему не другие:</strong><br>• «saved · put» — Past Simple тоже грамматически возможно, но <em>Present Perfect</em> показывает, что результат <em>влияет на настоящий момент</em>.<br>• «are saving · are putting» — неверно, потому что это процесс сейчас, а не результат.",
+      () => scenes.scene6()
+    );
+  });
+});
+
+scene('scene5_rage', function() {
+  setBg('camera_room2.jpg');
+  showText([
+    "You slam your fist on the desk. The keyboard jumps. A pen rolls off and hits the floor.",
+    {who: "You", text: "DAMN IT!"},
+    "Your voice echoes through the empty house. You're breathing hard. Your hand hurts.",
+    "You take a deep breath. Then you save the file to a USB drive and put it in your pocket.",
+    {who: "You", text: "I'm going to find you. And when I do —"},
+    "You don't finish the sentence. You don't need to."
+  ], () => {
+    showExercise(
+      "Complete the sentence (Present Perfect):<br><br>You <span class='blank'>___</span> your fist on the desk. Your hand <span class='blank'>___</span> ever since.",
+      ["have slammed · has hurt", "slammed · hurt", "are slamming · is hurting"],
+      0,
+      "<strong>have slammed</strong> — Present Perfect: <em>действие завершено, но результат ощущается сейчас</em>.<br><br><strong>has hurt</strong> — Present Perfect: <em>состояние началось в прошлом и продолжается сейчас</em> («рука болит с тех пор»).<br><br><strong>Почему не другие:</strong><br>• «slammed · hurt» — Past Simple не подчёркивает связь с настоящим.<br>• «are slamming · is hurting» — неверно: ты <em>ударил</em> (завершено) и рука <em>болит</em> (с тех пор, продолжается).",
+      () => scenes.scene6()
+    );
+  });
+});
+
+// ============================================================
+//  SCENE 6
+// ============================================================
+scene('scene6', function() {
+  setBg('camera_room2.jpg');
+  showText([
+    "You sit in the dark office. The screen is off. The house is silent. And your hands are still shaking.",
+    "You take out your phone. For a long moment, you just stare at it.",
+    "Police. You should call the police. That's what normal people do. That's what you do when someone disappears.",
+    "You're about to dial. Your thumb hovers over the screen.",
+    "And then — a memory. Your father's voice, quiet and certain, like he said it yesterday:",
+    "'If something ever happens — anything at all — don't call the police. Police won't help. They won't understand. You deal with it yourself, or you call a friend who can.'",
+    "You lower the phone. Slowly.",
+    "You never understood why he said that. You always thought it was strange. Your family was normal. Nothing ever happened to you. Why would your father have rules for a crisis?",
+    "But your father did have rules for a crisis. And now — tonight — those rules might be the only thing keeping you alive."
+  ], () => {
+    showChoices("What do you do?", [
+      { text: "You listen to your father. You don't call the police. He knew something you don't.", action: () => { changeStat('logic', 2); scenes.scene6_listen(); } },
+      { text: "You call anyway. Your parents are missing. This is bigger than your father's rules.", action: () => { changeStat('fear', 1); scenes.scene6_call(); } },
+      { text: "You call anyway. You're angry. Your father kept secrets. You're done with secrets.", action: () => { changeStat('rage', 2); scenes.scene6_call(); } }
+    ]);
+  });
+});
+
+scene('scene6_listen', function() {
+  setBg('cabinet.jpg');
+  showText([
+    "You put the phone down. Slowly. Carefully.",
+    "The police won't help. Your father knew that. And now — for the first time in your life — you're starting to believe him.",
+    "So what do you do? What would Dad do?",
+    "You think about the last thing you found: the leather journal. His handwriting. His notes. If your father knew something was coming, he would have left you a trail.",
+    "You stand up. Time to search this house properly."
+  ], () => {
+    showExercise(
+      "Complete the sentence (Present Perfect):<br><br>You <span class='blank'>___</span> the phone down. Your father <span class='blank'>___</span> right all along.",
+      ["have put · has been", "put · was", "are putting · is being"],
+      0,
+      "<strong>have put</strong> — Present Perfect: <em>действие только что завершено, результат важен сейчас</em>.<br><br><strong>has been</strong> — Present Perfect: <em>состояние длится с прошлого до настоящего момента</em> («был прав — и до сих пор прав»).<br><br><strong>Почему не другие:</strong><br>• «put · was» — Past Simple не подчёркивает <em>связь с настоящим</em>.<br>• «are putting · is being» — неверно: ты <em>положил</em> (завершено), а не кладёшь сейчас.",
+      () => scenes.scene7()
+    );
+  });
+});
+
+scene('scene6_call', function() {
+  setBg('cabinet.jpg');
+  showText([
+    "You dial 911 anyway. Your thumb presses the green button. Your heart is pounding.",
+    "The line rings once. Twice. Three times. Four. Five.",
+    "Then a click. And then — nothing. Not a voice. Not a recording. Just a low, steady hum of dead air.",
+    "You hang up. You dial again.",
+    "Same thing. Rings. Clicks. Dead air.",
+    {who: "You", text: "Come on... come on..."},
+    "You try one more time. Nothing.",
+    "You stare at the phone. Your father's words come back to you: 'Police won't help. They won't understand.'",
+    "He knew. He knew all along. And you didn't listen.",
+    {who: "You", text: "Okay, Dad. You win."},
+    "You put the phone down. Your hands are shaking. But your father was right. About everything."
+  ], () => {
+    showExercise(
+      "Complete the sentence (Present Perfect):<br><br>You <span class='blank'>___</span> three times, but nothing <span class='blank'>___</span>.",
+      ["have tried · has worked", "tried · worked", "are trying · is working"],
+      0,
+      "<strong>have tried</strong> — Present Perfect: <em>ты попробовал, и результат важен сейчас</em> (ты не знаешь, что делать).<br><br><strong>has worked</strong> — Present Perfect: <em>«не сработало» — результат до сих пор актуален</em>.<br><br><strong>Почему не другие:</strong><br>• «tried · worked» — Past Simple звучит так, будто ты <em>давно</em> попробовал и забыл. Но ты <em>только что</em> попробовал.<br>• «are trying · is working» — неверно: ты уже <em>закончил</em> попытки.",
+      () => scenes.scene7()
+    );
+  });
+});
+
+// ============================================================
+//  SCENE 7
+// ============================================================
+scene('scene7', function() {
+  setBg('cabinet.jpg');
+  showText([
+    "You need to think. When you're scared, you write — it's a habit you've had since school. It helps you slow down, focus, breathe.",
+    "You go to your father's desk, looking for a blank notebook or a piece of paper.",
+    "His desk is neat. Always has been. A pen on the left. A lamp on the right. And in the middle — a single sheet of paper, folded in half.",
+    "You pick it up. His handwriting. Neat. Precise.",
+    "The entry is dated five days ago. It says:"
+  ], () => {
+    setBg('fathers_note.jpg');
+    showText([
+      "'Djinn. Ravenwood...'",
+      {who: "You", text: "Djinn...? What's a djinn?"},
+      "Below the words, there's a small, hand-drawn symbol. Curved lines. Dots. Like Arabic writing, but not.",
+      "Exactly like the one on the living room wall."
+    ], () => {
+      showChoices("What do you do with the paper?", [
+        { text: "You read it again. And again. You study every letter, every line.", action: () => { changeStat('logic', 2); scenes.scene7_read(); } },
+        { text: "You fold it carefully and put it in your pocket. Whatever this is, it's important.", action: () => { changeStat('logic', 1); changeStat('fear', 1); scenes.scene7_pocket(); } },
+        { text: "You crumple it in your fist. This is what he was hiding from you. This is what he died for.", action: () => { changeStat('rage', 2); scenes.scene7_crumple(); } }
+      ]);
+    });
+  });
+});
+
+scene('scene7_read', function() {
+  setBg('fathers_note.jpg');
+  showText([
+    "You read it again. And again. You study the handwriting — careful, deliberate. The way he wrote 'Djinn' like it was a word he'd written a hundred times before.",
+    "Whatever a djinn is, your father knew about it. He'd been tracking it. Watching it.",
+    "And he'd been doing this for years. Maybe decades. Without ever telling you.",
+    "You fold the paper. Carefully. And you put it in your pocket.",
+    {who: "You", text: "I'll figure this out, Dad. I promise."}
+  ], () => {
+    showGrammar("Passive Voice: 'The journal was hidden. The symbol was drawn. This paper was written by your father.' — действие направлено на предмет, а не на того, кто его совершает.", () => {
+      showExercise(
+        "Complete the sentence (Past Simple Passive):<br><br>The paper <span class='blank'>___</span> by your father. The symbol <span class='blank'>___</span> on the wall.",
+        ["was written · was drawn", "wrote · drew", "is written · is drawn"],
+        0,
+        "<strong>was written · was drawn</strong> — Past Simple Passive: <em>was/were + V3</em>. Мы используем пассив, когда <em>важно действие или предмет</em>, а не тот, кто его совершает.<br><br><strong>Сравни:</strong> «Your father <em>wrote</em> the paper» (Active) → «The paper <em>was written</em> by your father» (Passive).<br><br><strong>Почему не другие:</strong><br>• «wrote · drew» — Active Voice: бумага <em>не писала сама себя</em>, символ <em>не рисовал сам себя</em>.<br>• «is written · is drawn» — Present Passive, а не Past Passive: это <em>было</em> в прошлом (5 дней назад).",
+        () => scenes.scene8()
+      );
+    });
+  });
+});
+
+scene('scene7_pocket', function() {
+  setBg('fathers_note.jpg');
+  showText([
+    "You fold it carefully and tuck it into your jacket pocket. Your hands are shaking a little, but the paper is safe now.",
+    "Whatever this is — this 'djinn' — your father wrote about it. He knew it was coming. And he wanted someone to find this.",
+    "Maybe he wanted you to find this.",
+    {who: "You", text: "What were you doing, Dad?"}
+  ], () => {
+    showGrammar("Passive Voice: 'The paper was written by your father. The symbol was drawn by hand.' — фокус на предмете и действии.", () => {
+      showExercise(
+        "Complete the sentence (Past Simple Passive):<br><br>The note <span class='blank'>___</span> in your father's handwriting. The symbol <span class='blank'>___</span> by hand.",
+        ["was written · was drawn", "wrote · drew", "has written · has drawn"],
+        0,
+        "<strong>was written · was drawn</strong> — Past Simple Passive.<br><br><strong>Почему не другие:</strong><br>• «wrote · drew» — Active: записка не писала себя сама.<br>• «has written · has drawn» — Present Perfect Active: неверно, потому что (1) это <em>Passive</em> нужен, (2) действие в прошлом с точной датой.",
+        () => scenes.scene8()
+      );
+    });
+  });
+});
+
+scene('scene7_crumple', function() {
+  setBg('fathers_note.jpg');
+  showText([
+    "You crumple the paper in your fist. Your jaw tightens.",
+    {who: "You", text: "You knew. You knew something was coming. And you never told me."},
+    "You want to throw it across the room. You almost do. But at the last second — you stop.",
+    "Because this is the only thing he left you. The only clue. And you need it.",
+    "You smooth the paper out on the desk. Fold it. Put it in your pocket.",
+    {who: "You", text: "Fine. I'll use it. Even if I hate you for keeping it secret."}
+  ], () => {
+    showGrammar("Passive Voice: 'The paper was crumpled. It was smoothed out. It was kept.' — цепочка действий над предметом.", () => {
+      showExercise(
+        "Complete the sentence (Past Simple Passive):<br><br>The paper <span class='blank'>___</span> in your fist. Then it <span class='blank'>___</span> out and <span class='blank'>___</span>.",
+        ["was crumpled · was smoothed · was kept", "crumpled · smoothed · kept", "is crumpled · is smoothed · is kept"],
+        0,
+        "<strong>was crumpled · was smoothed · was kept</strong> — цепочка Past Simple Passive.<br><br>Мы используем пассив, потому что <em>важен предмет (бумага) и что с ним сделали</em>, а не кто именно.<br><br><strong>Почему не другие:</strong><br>• «crumpled · smoothed · kept» — Active: бумага не может «скомкать себя сама».<br>• «is crumpled · is smoothed · is kept» — Present Passive: неверно, потому что действия <em>завершены в прошлом</em>.",
+        () => scenes.scene8()
+      );
+    });
+  });
+});
+
+// ============================================================
+//  SCENE 8
+// ============================================================
+scene('scene8', function() {
+  setBg('closet.jpg');
+  showText([
+    "You search the house. Room by room. Nothing in the kitchen. Nothing in the hallway. Nothing in the bedrooms.",
+    "And then — your parents' closet.",
+    "You know this house. You grew up here. And you know — because you've seen it a hundred times — that your parents always kept something hidden in the back of their closet.",
+    "Christmas gifts. Birthday surprises. Your mother's 'lucky charms' — small stones and silver coins she believed protected the family.",
+    "You always thought it was cute.",
+    "Now your hands move on instinct.",
+    "You push aside the coats. You reach for the back panel. You feel for the loose board.",
+    "There it is.",
+    "You lift the board. Underneath — a small wooden box."
+  ], () => {
+    setBg('wooden_box.jpg');
+    showText([
+      "You open it.",
+      "Inside:",
+      "- A leather-bound journal. Your father's handwriting on the cover.",
+      "- A silver knife. Strange markings on the blade.",
+      "- A small cloth bag. You open it. Salt.",
+      "- A handgun.",
+      "- An old photograph.",
+      "You stare at the contents for a long moment."
+    ], () => {
+      showChoices("What do you do?", [
+        { text: "You take everything. Whatever this is, it's important. You're not leaving it here.", action: () => { state.inventory.fathersJournal = true; state.inventory.silverKnife = true; state.inventory.salt = true; state.inventory.gun = true; updateStats(); changeStat('logic', 2); scenes.scene8_take_all(); } },
+        { text: "You take the journal first. That's the most important thing. Then the knife and salt — just in case.", action: () => { state.inventory.fathersJournal = true; state.inventory.silverKnife = true; state.inventory.salt = true; updateStats(); changeStat('logic', 1); scenes.scene8_take_some(); } },
+        { text: "You just stare. Your parents kept weapons. Your parents kept secrets. You don't know who they were.", action: () => { state.inventory.fathersJournal = true; state.inventory.silverKnife = true; state.inventory.salt = true; state.inventory.gun = true; updateStats(); changeStat('fear', 2); scenes.scene8_freeze(); } }
+      ]);
+    });
+  });
+});
+
+scene('scene8_take_all', function() {
+  setBg('wooden_box.jpg');
+  showText([
+    "You take everything. The journal. The knife. The salt. The gun. The photograph.",
+    "You wrap them in a cloth from the closet and put them in your bag.",
+    "You don't know what any of it means. But it's all you have left of them.",
+    {who: "You", text: "I'm not leaving anything behind."}
+  ], () => {
+    showExercise(
+      "Complete the sentence (Past Simple — цепочка действий):<br><br>You <span class='blank'>___</span> everything, <span class='blank'>___</span> it in a cloth, and <span class='blank'>___</span> it in your bag.",
+      ["took · wrapped · put", "were taking · were wrapping · were putting", "take · wrap · put"],
+      0,
+      "<strong>took · wrapped · put</strong> — Past Simple: <em>три последовательных завершённых действия</em>.<br><br><strong>Почему не другие:</strong><br>• «were taking · were wrapping · were putting» — Past Continuous: неверно, потому что действия <em>завершены</em> (ты уже всё взял).<br>• «take · wrap · put» — Present Simple: неверно, история в прошлом.",
+      () => scenes.scene9()
+    );
+  });
+});
+
+scene('scene8_take_some', function() {
+  setBg('wooden_box.jpg');
+  showText([
+    "You take the journal first. That's the most important thing — the words, the notes, the trail he left.",
+    "Then the knife. Then the salt. Something tells you they matter.",
+    "You leave the gun. You've never fired one. You don't want to start tonight.",
+    {who: "You", text: "Journal. Knife. Salt. That's enough."}
+  ], () => {
+    showExercise(
+      "Complete the sentence (Past Simple):<br><br>You <span class='blank'>___</span> the journal and the knife, but you <span class='blank'>___</span> the gun.",
+      ["took · left", "were taking · were leaving", "take · leave"],
+      0,
+      "<strong>took · left</strong> — Past Simple: <em>два завершённых действия</em>.<br><br><strong>Почему не другие:</strong><br>• «were taking · were leaving» — Continuous не подходит: ты <em>взял</em> и <em>оставил</em> — это факты, а не процессы.<br>• «take · leave» — Present Simple: время не то.",
+      () => scenes.scene9()
+    );
+  });
+});
+
+scene('scene8_freeze', function() {
+  setBg('wooden_box.jpg');
+  showText([
+    "You just stare. At the journal. At the knife. At the salt. At the gun.",
+    "Your parents kept weapons. Hidden. Behind a board. In a box.",
+    "Your parents were not who you thought they were.",
+    "You don't know who they were. You don't know what they did. You don't know what any of this means.",
+    "You take everything. Your hands are shaking so badly you almost drop the salt.",
+    {who: "You", text: "Who were you?"}
+  ], () => {
+    showExercise(
+      "Complete the sentence (Past Simple):<br><br>Your parents <span class='blank'>___</span> weapons. But you <span class='blank'>___</span> them at all.",
+      ["kept · didn't know", "were keeping · weren't knowing", "keep · don't know"],
+      0,
+      "<strong>kept · didn't know</strong> — Past Simple: <em>факты в прошлом</em>.<br><br><strong>Почему не другие:</strong><br>• «were keeping · weren't knowing» — неверно: <em>keep</em> и <em>know</em> — статичные глаголы, они <em>не используются в Continuous</em>.<br>• «keep · don't know» — Present Simple: время не то.",
+      () => scenes.scene9()
+    );
+  });
+});
+
+// ============================================================
+//  SCENE 9
+// ============================================================
+scene('scene9', function() {
+  setBg('Photo_in_closet.jpg');
+  showText([
+    "You pick up the old photograph and look at it closely.",
+    "It's your parents. Standing next to a black Chevrolet Impala. Smiling.",
+    "Next to them — John Winchester. And two young men. Dean, older, cocky grin. Sam, younger, serious eyes.",
+    "You remember them. Just barely. Kids you played with. The Winchesters. The family that moved away when you were small.",
+    "But it's not the people that make your hands go cold.",
+    "It's what's behind them.",
+    "On the ground. Something big. Something with fur, long claws, and a face that doesn't belong to any animal you know.",
+    "Something dead.",
+    "A creature the size of a bear. Too long. Too thin. Its mouth is open. Rows of teeth that don't belong in any animal you've ever seen.",
+    "It looks like something out of a horror film.",
+    "But it's real. And your parents are standing next to it, smiling. Calm. Like this is normal.",
+    "Like this is just what they did."
+  ], () => {
+    showChoices("How do you react?", [
+      { text: "You feel sick. Your parents hunted monsters. They lied to you your whole life.", action: () => { changeStat('fear', 2); scenes.scene9_fear(); } },
+      { text: "You study the photo. The Impala. The Winchesters. The creature. You need to understand what you're looking at.", action: () => { changeStat('logic', 2); scenes.scene9_logic(); } },
+      { text: "You feel anger. Hot and clean. Your parents lied. The Winchesters lied. Everyone lied. You want the truth.", action: () => { changeStat('rage', 2); scenes.scene9_rage(); } }
+    ]);
+  });
+});
+
+scene('scene9_fear', function() {
+  setBg('Photo_in_closet.jpg');
+  showText([
+    "You sit down on the edge of the bed. Your legs don't feel steady.",
+    "Your parents hunted monsters. Your parents killed things. Your parents stood next to dead creatures like it was just another Sunday.",
+    "Everything you thought you knew is wrong. Everything.",
+    {who: "You", text: "Who were you? Who were you really?"},
+    "The photo shakes in your hand. You put it down. You can't look at it anymore."
+  ], () => {
+    showGrammar("Past Simple vs Past Perfect: 'You thought you knew them. You had never really known them.' — момент осознания.", () => {
+      showExercise(
+        "Complete the sentence (Past Perfect):<br><br>You <span class='blank'>___</span> you knew them. But you <span class='blank'>___</span> them at all.",
+        ["thought · hadn't known", "were thinking · didn't know", "think · don't know"],
+        0,
+        "<strong>thought</strong> — Past Simple: <em>состояние в прошлом</em>.<br><br><strong>hadn't known</strong> — Past Perfect: <em>действие, которое было верно <u>до</u> момента в прошлом</em> (ты никогда не знал их <em>до</em> того, как понял это сейчас).<br><br><strong>Почему не другие:</strong><br>• «were thinking · didn't know» — неверно: <em>think</em> и <em>know</em> — статичные глаголы, не в Continuous.<br>• «think · don't know» — Present Simple: время не то.",
+        () => scenes.scene10()
+      );
+    });
+  });
+});
+
+scene('scene9_logic', function() {
+  setBg('Photo_in_closet.jpg');
+  showText([
+    "You study the photo. Carefully. Methodically. Like a puzzle.",
+    "The Impala — classic car, black, well-kept. The Winchesters — hunters, probably. John in the middle, the boys on either side.",
+    "The creature — a monster. The kind that doesn't exist in normal books.",
+    "Your parents — smiling. Calm. Like this is normal.",
+    "There's only one conclusion: your parents were hunters. And the Winchesters are hunters. And they were friends.",
+    "Which means — the Winchesters might still be alive.",
+    "Which means — they might still be able to help."
+  ], () => {
+    showGrammar("Past Simple: 'You studied the photo. You concluded that your parents were hunters.' — логическая цепочка.", () => {
+      showExercise(
+        "Complete the sentence (Past Perfect):<br><br>You <span class='blank'>___</span> the photo and realised that your parents <span class='blank'>___</span> you the truth.",
+        ["studied · hadn't told", "were studying · didn't tell", "study · don't tell"],
+        0,
+        "<strong>studied</strong> — Past Simple: <em>завершённое действие</em>.<br><br><strong>hadn't told</strong> — Past Perfect: <em>действие, которое произошло <u>раньше</u> другого в прошлом</em> (сначала они не сказали правду — потом ты это понял).<br><br><strong>Почему не другие:</strong><br>• «were studying · didn't tell» — неверно: <em>study</em> — завершённое, <em>tell</em> — до момента осознания.<br>• «study · don't tell» — Present Simple: время не то.",
+        () => scenes.scene10()
+      );
+    });
+  });
+});
+
+scene('scene9_rage', function() {
+  setBg('Photo_in_closet.jpg');
+  showText([
+    "You stare at the photo. The Impala. The Winchesters. The dead thing on the ground. Your parents, smiling.",
+    "Smiling. Like this was normal.",
+    {who: "You", text: "You lied to me. My whole life. You lied to me."},
+    "Your hands are shaking, but not from fear. From anger. Hot and clean.",
+    "They knew. They knew all of this. They hid it. They chose to hide it.",
+    "And now they're gone. And you're the one left holding the pieces."
+  ], () => {
+    showGrammar("Past Perfect: 'They had lied. They had hidden it.' — действие, которое произошло раньше другого в прошлом.", () => {
+      showExercise(
+        "Complete the sentence (Past Perfect):<br><br>They <span class='blank'>___</span> to you. They <span class='blank'>___</span> everything.",
+        ["had lied · had hidden", "lied · hid", "were lying · were hiding"],
+        0,
+        "<strong>had lied · had hidden</strong> — Past Perfect: <em>действия, которые произошли <u>до</u> момента в прошлом</em> (сначала они соврали и спрятали — потом ты нашёл фото и понял).<br><br><strong>Почему не другие:</strong><br>• «lied · hid» — Past Simple не подчёркивает, что <em>это произошло раньше</em> другого события.<br>• «were lying · were hiding» — Continuous: <em>lie</em> и <em>hide</em> здесь — завершённые действия, а не процессы.",
+        () => scenes.scene10()
+      );
+    });
+  });
+});
+
+// ============================================================
+//  SCENE 10
+// ============================================================
+scene('scene10', function() {
+  setBg('Photo_in_closet.jpg');
+  showText([
+    "You're about to put the photo away — and then something clicks.",
+    "A memory. You were supposed to be asleep. But you were sitting at the top of the stairs, listening to your parents talking in the kitchen.",
+    "You remember your mother's voice:",
+    {who: "Your Mother", text: "They moved again, to another state. What if we lose touch with them?"},
+    "And your father's answer:",
+    {who: "Your Father", text: "Don't worry. Everything will be fine. It doesn't matter if they live in the next town, a different state, or another country. It doesn't matter if we don't talk every day. Yes, we are not neighbours anymore. Neighbours can be 'former'. But friends are never 'former'. True friends are forever. They'll come if we call. And we'll go anywhere if they just phone us."},
+    "The next morning, your father said almost the same thing to you. Shorter. He was making pancakes. He didn't even look up.",
+    {who: "Your Father", text: "You know, if anything ever happens — if you ever need help — you call the Winchesters. John, Dean or Sam. Anytime. They'll come."},
+    "You nodded. You didn't think about it. You didn't ask why.",
+    "You were nine years old.",
+    "You never asked why.",
+    "Now you do."
+  ], () => {
+    showChoices("What do you do?", [
+      { text: "You remember the Winchesters' old house in Ravenwood. You remember the street. The porch. You have to try.", action: () => { changeStat('logic', 2); scenes.scene11(); } },
+      { text: "You don't have their number. You have nothing. But your father said 'they'll come' — and you have to believe him.", action: () => { changeStat('fear', 1); changeStat('logic', 1); scenes.scene11(); } },
+      { text: "You grab your bag. You grab the photo. You don't even know if they're still alive. But you're going to find out.", action: () => { changeStat('rage', 2); scenes.scene11(); } }
+    ]);
+  });
+});
+
+// ============================================================
+//  SCENE 11
+// ============================================================
+scene('scene11', function() {
+  setBg('living_room.jpg');
+  showText([
+    "You stand in the middle of your parents' ruined living room. The symbol on the wall stares back at you.",
+    "The photo is in your pocket. The journal is in your bag. The knife, the salt, the gun — all of it.",
+    "Your parents were hunters. The Winchesters are hunters. And if the Winchesters are still in Ravenwood — you need to find them.",
+    "Tonight.",
+    "Before whatever took your parents comes back for you.",
+    {who: "You", text: "Okay, Dad. I'm calling your friends."},
+    "You walk out the front door. The night air is cold. The stars are enormous. The town is silent.",
+    "And somewhere in this quiet Kansas town — a black Impala might still be parked in a driveway.",
+    "You're going to find it."
+  ], () => {
+    showExercise(
+      "Final check — Passive Voice (все времена):<br><br>Your parents <span class='blank'>___</span> by something. The journal <span class='blank'>___</span> under the floor. The symbol <span class='blank'>___</span> on the wall.",
+      ["were taken · was hidden · was drawn", "took · hid · drew", "are taken · is hidden · is drawn"],
+      0,
+      "<strong>were taken · was hidden · was drawn</strong> — Past Simple Passive (was/were + V3).<br><br>Мы используем пассив, потому что важно <em>что произошло с предметами/людьми</em>, а не кто именно это сделал.<br><br><strong>Почему не другие:</strong><br>• «took · hid · drew» — Active: родители не «взяли себя сами», журнал не «спрятал себя», символ не «нарисовал себя».<br>• «are taken · is hidden · is drawn» — Present Passive: неверно, потому что события <em>уже произошли</em> в прошлом.",
+            () => {
+        // финал этапа 1 — с сохранением прогресса
+        state.currentSceneName = 'scene12';
+        saveGame();
+        document.getElementById('text-box').innerHTML = '<span style="color:#b8860b;font-size:24px;">🩸 THE END OF EPISODE 1 🩸</span><br><br>Fear: ' + state.fear + ' · Logic: ' + state.logic + ' · Rage: ' + state.rage + '<br><br>Thank you for playing.<br><br><button onclick="scenes.scene12()" style="background:#b8860b;color:#000;border:none;padding:14px 34px;font-size:18px;border-radius:6px;cursor:pointer;margin-top:10px;">Continue to Episode 2 →</button><br><br><button onclick="startNew()" style="background:transparent;color:#888;border:1px solid #888;padding:8px 20px;font-size:14px;border-radius:6px;cursor:pointer;">🩸 Play Again</button>';
+        document.getElementById('text-box').style.display = 'block';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('hint').style.display = 'none';
+      }
+    );
+  });
+});
+
+// ============================================================
+//  СТАРТ
+// ============================================================
+function startNew() {
+  // Запускаем музыку при первом клике (браузеры это разрешают)
+  if (!musicPlaying) {
+    bgMusic.play().catch(e => console.log('Музыка не запустилась:', e));
+    musicToggle.textContent = '🎵';
+    musicPlaying = true;
+  }
+  
+  localStorage.removeItem(SAVE_KEY);
+  
+  state = {
+    fear: 0, logic: 0, rage: 0,
+    inventory: { photoOfSymbol: false, cameraFootage: false, fathersJournal: false, silverKnife: false, salt: false, gun: false, oldPhoto: false },
+    currentTexts: [], currentTextIndex: 0, currentSceneAfterTexts: null, history: [], currentSceneName: 'start'
+  };
+  updateStats();
+  document.getElementById('start-overlay').style.display = 'none';
+  scenes.start();
+}
+
+function continueGame() {
+  const save = loadSave();
+  if (!save) { startNew(); return; }
+  state.fear = save.fear || 0;
+  state.logic = save.logic || 0;
+  state.rage = save.rage || 0;
+  state.inventory = save.inventory || state.inventory;
+  updateStats();
+  document.getElementById('start-overlay').style.display = 'none';
+  const sceneName = save.sceneName || 'start';
+  const fn = scenes[sceneName];
+  if (fn) fn(); else scenes.start();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('grammar-overlay').style.display === 'flex') return;
+  if (document.getElementById('exercise-overlay').style.display === 'flex') return;
+  if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowRight') {
+    e.preventDefault();
+    if (document.getElementById('choices').style.display !== 'flex') nextText();
+  } else if (e.code === 'ArrowLeft') {
+    e.preventDefault();
+    goBack();
+  }
+});
+
+updateStats();
+if (hasSave()) {
+  document.getElementById('btn-continue').style.display = 'block';
+} else {
+  document.getElementById('btn-continue').style.display = 'none';
+}
+
+
+
+// ============================================================
+//  ЭТАП 3 — СЦЕНЫ 12–16
+//  Дом Винчестеров · Миссис Клайн · Крыльцо · Звонок Дину
+// ============================================================
+
+// ===== СЦЕНА 12: ПОДХОД К ДОМУ ВИНЧЕСТЕРОВ (8:45 PM) =====
+scene('scene12', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "Two streets. That's all that separates your parents' house from the Winchesters' old place.",
+    "You walk. The night air is cold. The street is quiet. Too quiet. No dogs barking. No porch lights. No cars.",
+    "And then — you see it.",
+    "The Winchester house. Two stories. Old. Brick. The same house you remember from childhood.",
+    "The porch light is on. Warm yellow. Soft.",
+    "And from inside — through the closed windows — you can hear something.",
+    "Not voices. Something softer. A radio, playing very low.",
+    "Someone's here. Or someone was."
+  ], () => {
+    showChoices("What do you do?", [
+      { text: "You knock. Firmly. You need answers.", action: () => { changeStat('logic', 1); scenes.scene12_knock(); } },
+      { text: "You walk around the side, looking through the windows.", action: () => { changeStat('logic', 2); scenes.scene12_around(); } },
+      { text: "You stand still and listen. Maybe you'll hear a voice.", action: () => { changeStat('fear', 1); scenes.scene12_listen(); } }
+    ]);
+  });
+});
+
+scene('scene12_knock', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You walk up to the front door and knock. Firm. Three times.",
+    "Nothing.",
+    "You knock again. Harder.",
+    "Still nothing. But the radio inside keeps playing. Soft. Low. Steady.",
+    "You try the doorknob. Locked.",
+    {who: "You", text: "Hello? Is anyone home?"},
+    "No answer. Just the radio."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Present Continuous — действие сейчас):<br><br>You <span class='blank'>___</span> at the door, but no one <span class='blank'>___</span>.",
+      ["are knocking · is answering", "knock · answers", "were knocking · was answering"],
+      0,
+      "<strong>are knocking · is answering</strong> — Present Continuous: <em>действие происходит прямо сейчас, в момент речи</em>.<br><br><strong>Почему не другие:</strong><br>• «knock · answers» — Present Simple, но в этот момент ты <em>стучишь именно сейчас</em>, а не регулярно.<br>• «were knocking · was answering» — Past Continuous, но история ещё не в прошлом — она происходит прямо сейчас.",
+      () => scenes.scene13()
+    );
+  });
+});
+
+scene('scene12_around', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You step off the porch and move quietly around the side of the house.",
+    "Curtains are drawn. Tight. No gaps. No light spilling through.",
+    "But the radio keeps playing — you can hear it more clearly now. Old rock. Slow. Sad.",
+    "Through the kitchen window, you see a single lamp on. A mug on the table. Steam rising from it.",
+    "Someone made tea. Recently. And then... left?",
+    "You try the back door. Locked."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Present Perfect — результат сейчас):<br><br>Someone <span class='blank'>___</span> tea. The mug <span class='blank'>___</span> on the table.",
+      ["has made · is still", "made · was still", "makes · is still"],
+      0,
+      "<strong>has made · is still</strong> — Present Perfect + Present Simple: <em>результат в настоящем</em> (чай сделан — и он <em>до сих пор</em> на столе).<br><br><strong>Почему не другие:</strong><br>• «made · was still» — Past Simple: не подчёркивает, что результат <em>виден сейчас</em>.<br>• «makes · is still» — Present Simple в первой части: неверно, потому что действие <em>уже завершено</em>.",
+      () => scenes.scene13()
+    );
+  });
+});
+
+scene('scene12_listen', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You stop. You stand still. You close your eyes.",
+    "You listen.",
+    "The radio. Old rock. Something slow.",
+    "And under it — you're almost sure — the sound of footsteps. Inside. Somewhere deep in the house.",
+    "You wait. They don't come closer. They don't stop.",
+    "But when you open your eyes and look around — there's nothing. No movement. No shadow behind the curtains.",
+    "Just the radio. And the footsteps. And the dark street behind you."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Continuous — что происходило в момент):<br><br>While you <span class='blank'>___</span>, someone <span class='blank'>___</span> inside the house.",
+      ["were listening · was walking", "listened · walked", "listen · walk"],
+      0,
+      "<strong>were listening · was walking</strong> — Past Continuous: <em>два длительных действия одновременно</em> в прошлом.<br><br><strong>Почему не другие:</strong><br>• «listened · walked» — Past Simple: неверно, потому что оба действия <em>длились</em>.<br>• «listen · walk» — Present Simple: время не то, история в прошлом.",
+      () => scenes.scene13()
+    );
+  });
+});
+
+// ===== СЦЕНА 13: МИССИС КЛАЙН (9:00 PM) =====
+scene('scene13', function() {
+  setBg('winchester_house.jpg');
+  showText([
+    "You step back from the door. The radio is still playing. Nobody is coming.",
+    "You look across the street. There's a light on in one of the houses — an old woman's place. You remember her. Mrs. Kline. She's lived here forever.",
+    "You cross the street. Your steps sound loud in the quiet.",
+    "You knock.",
+    "The door opens a crack. An old face appears. Tired. Wary.",
+    {who: "Mrs. Kline", text: "Yes? What do you want?"},
+    {who: "You", text: "I'm sorry to bother you. I'm Thomas and Sarah's child."},
+    "Her eyes widen. The door opens a little more."
+  ], () => {
+    showChoices("What do you ask?", [
+      { text: "About the Winchesters. Are they still here?", action: () => { changeStat('logic', 1); scenes.scene13_winchesters(); } },
+      { text: "About your parents. Have you seen them?", action: () => { changeStat('fear', 1); scenes.scene13_parents(); } },
+    ]);
+  });
+});
+
+scene('scene13_winchesters', function() {
+  setBg('winchester_house.jpg');
+  showText([
+    {who: "You", text: "The Winchesters. Are they still around? They used to live across the street."},
+    "Mrs. Kline looks at you for a long moment. Her eyes move to the dark street, then back to you.",
+    {who: "Mrs. Kline", text: "They haven't been here in weeks. But Dean calls sometimes — checks in on the old neighbourhood."},
+    "She pauses. Her hand trembles slightly on the doorframe.",
+    {who: "Mrs. Kline", text: "Why do you ask? Is something wrong?"},
+    {who: "You", text: "My parents are gone. Their house is destroyed. I don't know who to call."},
+    "The old woman's face goes pale. She looks at the street again. She looks scared."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Present Perfect — состояние с прошлого до сейчас):<br><br>The Winchesters <span class='blank'>___</span> from Ravenwood for weeks.",
+      ["have been away", "were away", "are away"],
+      0,
+      "<strong>have been away</strong> — Present Perfect: <em>состояние началось в прошлом и продолжается</em> (их нет уже несколько недель — и сейчас тоже нет).<br><br><strong>Почему не другие:</strong><br>• «were away» — Past Simple: не подчёркивает <em>связь с настоящим</em>.<br>• «are away» — Present Simple: не хватает длительности; «for weeks» требует Perfect.",
+      () => scenes.scene13_kline_van()
+    );
+  });
+});
+
+scene('scene13_parents', function() {
+  setBg('winchester_house.jpg');
+  showText([
+    {who: "You", text: "Have you seen my parents? Thomas and Sarah? They live on Cedar Street."},
+    "Mrs. Kline's face changes. She looks down. Then to the side. Then back at you.",
+    {who: "Mrs. Kline", text: "I haven't seen them in days. I thought they were on a trip. Or visiting you."},
+    {who: "You", text: "They're not. They're gone. Their house is destroyed."},
+    "The old woman brings a hand to her mouth. Her eyes fill with tears.",
+    {who: "Mrs. Kline", text: "Oh, dear. Oh, no. I was afraid of this. I was afraid something was wrong."}
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Present Perfect — результат сейчас):<br><br>You <span class='blank'>___</span> your parents, and I <span class='blank'>___</span> afraid something is wrong.",
+      ["haven't seen · have been", "didn't see · was", "don't see · am"],
+      0,
+      "<strong>haven't seen · have been</strong> — Present Perfect: <em>ситуация длится до сих пор</em>.<br><br><strong>Почему не другие:</strong><br>• «didn't see · was» — Past Simple: не подчёркивает, что страх <em>до сих пор</em>.<br>• «don't see · am» — Present Simple: не подчёркивает длительность.",
+      () => scenes.scene13_kline_van()
+    );
+  });
+});
+
+scene('scene13_van', function() {
+  setBg('winchester_house.jpg');
+  showText([
+    {who: "You", text: "Two nights ago. Did you see anything strange? A car? A van? Anything out of the ordinary?"},
+    "Mrs. Kline's hand tightens on the door. She looks left, then right, then back at you.",
+    {who: "Mrs. Kline", text: "There was a black van. Parked across from your parents' house. Two nights ago."},
+    {who: "Mrs. Kline", text: "No plates. Nobody got out. In the morning, it was gone."},
+    "She swallows hard.",
+    {who: "Mrs. Kline", text: "I should have called someone. I should have said something. But I didn't know who to call."}
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Simple — что произошло):<br><br>A black van <span class='blank'>___</span> across from your parents' house, and by morning it <span class='blank'>___</span>.",
+      ["was parked · was gone", "is parked · is gone", "has parked · has gone"],
+      0,
+      "<strong>was parked · was gone</strong> — Past Simple: <em>завершённые факты в прошлом</em>.<br><br><strong>Почему не другие:</strong><br>• «is parked · is gone» — Present Simple: вэн <em>был</em> там в прошлом, сейчас его нет.<br>• «has parked · has gone» — Present Perfect: неверно, потому что действие <em>завершено давно</em> (ночь прошла).",
+      () => scenes.scene13_kline_van()
+    );
+  });
+});
+
+// ===== ОБЩАЯ СЦЕНА: КЛАЙН ДАЁТ НОМЕР =====
+scene('scene13_kline_van', function() {
+  setBg('winchester_house.jpg');
+  showText([
+    "Mrs. Kline looks at you for a long moment. Then she nods to herself, like she's just made a decision.",
+    {who: "Mrs. Kline", text: "Wait here. Just a minute."},
+    "She disappears inside. You hear drawers opening. A moment later, she's back.",
+    "She's holding a small, folded piece of paper. She presses it into your hand.",
+    {who: "Mrs. Kline", text: "Dean Winchester. He gave me this number last time he was here. He said — if you ever need anything, call me. I never thought I'd need to."},
+    "You unfold the paper. A phone number. Handwritten. Small.",
+    {who: "Mrs. Kline", text: "You should go. You shouldn't stay out here."},
+    "She closes the door. The lock clicks. The porch light goes off.",
+    "And you're alone on the dark street. The number in your hand. The phone in your pocket."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Perfect — что было раньше):<br><br>Dean <span class='blank'>___</span> her the number a long time ago, but she <span class='blank'>___</span> never called him.",
+      ["had given · had", "gave · has", "gave · had"],
+      0,
+      "<strong>had given · had</strong> — Past Perfect: <em>действие, которое произошло <u>раньше</u> другого действия в прошлом</em>.<br><br><strong>Почему не другие:</strong><br>• «gave · has» — вторая часть Present Perfect, но соседка рассказывает о <em>прошлом</em>, не о настоящем.<br>• «gave · had» — первая часть Past Simple: не подчёркивает, что он дал номер <em>до</em> этого разговора.",
+      () => scenes.scene14()
+    );
+  });
+});
+
+// ===== СЦЕНА 14: КРЫЛЬЦО — BRANCHING POINT 1 =====
+scene('scene14', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You walk back to the Winchesters' porch. The light is still on. The radio is still playing inside. Nobody opens the door.",
+    "You sit down on the cold wooden steps.",
+    "You take out your phone. You unfold the piece of paper.",
+    "Dean Winchester. The number.",
+    "Your thumb hovers over the green button.",
+    "You don't press it yet. You need a second.",
+    "Your hands are shaking. Your heart is pounding. The freezing air stings your face.",
+    "You close your eyes.",
+    "And you force yourself to look deep into your own mind:"
+  ], () => {
+    showChoices("What do you feel right now?", [
+      { text: "You feel overwhelmed by fear. The shadows around the house seem to move. The thing from the camera might be watching you right now.", action: () => { changeStat('fear', 2); scenes.scene14_fear(); } },
+      { text: "You force yourself to stay calm. You think about your father's notebook, the word 'Djinn', the salt, the photo. A puzzle. You can solve it.", action: () => { changeStat('logic', 2); scenes.scene14_logic(); } },
+      { text: "You feel pure anger. Your parents had secrets. The Winchesters are in the middle of it. You want the truth.", action: () => { changeStat('rage', 2); scenes.scene14_rage(); } }
+    ]);
+  });
+});
+
+scene('scene14_fear', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "The night feels suffocating. Every rustle of leaves sounds like footsteps. Every shadow looks like the thing from the camera.",
+    "Your hands are shaking so badly you can barely hold the paper.",
+    "You press the green button out of sheer desperation. You just need someone to save you from the dark.",
+    {who: "You", text: "Please pick up. Please pick up."},
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Continuous — что происходило):<br><br>Your hands <span class='blank'>___</span> so badly you could barely hold the phone.",
+      ["were shaking", "shook", "have shaken"],
+      0,
+      "<strong>were shaking</strong> — Past Continuous: <em>длительное состояние</em> в момент в прошлом.<br><br><strong>Почему не другие:</strong><br>• «shook» — Past Simple: не подчёркивает длительность.<br>• «have shaken» — Present Perfect: не сочетается со «could barely hold», которое в прошлом.",
+      () => scenes.scene15()
+    );
+  });
+});
+
+scene('scene14_logic', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You take a deep, measured breath. The cold air stings your lungs. But it helps you focus.",
+    "Facts: four days missing. Dark figure at 2:47 AM. A strange symbol. A notebook entry about a 'djinn'. A box of hunting gear. A black van with no plates.",
+    "This wasn't a random robbery. Your parents knew this could happen.",
+    "You steady your fingers. You grip the phone. You press dial.",
+    {who: "You", text: "Please pick up. Please pick up."},
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Perfect — что было раньше):<br><br>Your parents <span class='blank'>___</span> this could happen. They <span class='blank'>___</span> for it.",
+      ["had known · had prepared", "knew · prepared", "have known · have prepared"],
+      0,
+      "<strong>had known · had prepared</strong> — Past Perfect: <em>действия, которые произошли <u>раньше</u> момента в прошлом</em>.<br><br><strong>Почему не другие:</strong><br>• «knew · prepared» — Past Simple: не подчёркивает, что <em>сначала</em> знали, <em>потом</em> случилось.<br>• «have known · have prepared» — Present Perfect: не сочетается с рассказом в прошлом.",
+      () => scenes.scene15()
+    );
+  });
+});
+
+scene('scene14_rage', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You look at the dark windows of the Winchesters' house.",
+    "Why didn't your parents tell you? Why did they play the role of a normal family while hiding silver knives and guns in the closet?",
+    "And why did your father tell you to trust these people?",
+    "You feel like your whole life has been a carefully crafted lie.",
+    "Your fear turns into a hot, dangerous anger. You press the green button hard.",
+    {who: "You", text: "You owe me answers. All of you."},
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Perfect — что было сделано раньше):<br><br>Your parents <span class='blank'>___</span> the truth from you. They <span class='blank'>___</span> you a lie.",
+      ["had hidden · had told", "hid · told", "have hidden · have told"],
+      0,
+      "<strong>had hidden · had told</strong> — Past Perfect: <em>действия, которые произошли <u>до</u> того, как ты узнал правду</em>.<br><br><strong>Почему не другие:</strong><br>• «hid · told» — Past Simple: не подчёркивает, что это было <em>раньше</em> момента осознания.<br>• «have hidden · have told» — Present Perfect: не сочетается с рассказом в прошлом.",
+      () => scenes.scene15()
+    );
+  });
+});
+
+// ===== СЦЕНА 15: ДИН ОТВЕЧАЕТ — BRANCHING POINT 2 =====
+scene('scene15', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "It rings once. Twice. Three times.",
+    "And then — a click.",
+    "A voice. Deep. Gravelly. Tired.",
+    {who: "Dean", text: "This is Dean."},
+    "Your heart leaps into your throat. You swallow hard.",
+    "You have to say something. Now."
+  ], () => {
+    showChoices("What do you say?", [
+      { text: "\"Dean — it's me. Thomas and Sarah's child. My parents are gone. Something took them. I saw it on the camera. I found your number from Mrs. Kline. I don't know what to do...\"", action: () => { changeStat('fear', 2); scenes.scene15_frantic(); } },
+      { text: "\"Is this Dean Winchester? My parents are Thomas and Sarah. They've been missing for four days. Their house is destroyed. Mrs. Kline gave me your number. My father told me to call you if anything ever happened.\"", action: () => { changeStat('logic', 2); scenes.scene15_calm(); } },
+      { text: "\"Who are you? My parents have been missing for days — something dragged them out of the house. Why do my parents have a photo of you with something dead? What is going on? I need answers, right now.\"", action: () => { changeStat('rage', 2); scenes.scene15_aggressive(); } }
+    ]);
+  });
+});
+
+scene('scene15_frantic', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "You can hear yourself babbling. Your voice is high. The words tumble over each other.",
+    {who: "Dean", text: "Hey. Hey. Slow down. Breathe."},
+    "You stop. You breathe.",
+    {who: "Dean", text: "You said Thomas and Sarah. Thomas and Sarah's kid... Son of a bitch. I knew this day would come, but not like this."},
+    {who: "Dean", text: "Listen to me. Your parents are tough. They're survivors. But we're losing time. Where are you right now?"},
+    {who: "You", text: "On your porch. Your old house. The light was on. The radio was playing. Nobody answered."},
+    "You hear him curse under his breath.",
+    {who: "Dean", text: "Our porch?! Get off that porch. Right now. Do not look at the windows. Walk straight to your car. Lock the doors. Keep the engine running."},
+    {who: "Dean", text: "We are out of time."}
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Perfect — что случилось раньше):<br><br>Dean <span class='blank'>___</span> that this day would come. Your parents <span class='blank'>___</span> him about the danger years ago.",
+      ["had known · had told", "knew · told", "have known · have told"],
+      0,
+      "<strong>had known · had told</strong> — Past Perfect: <em>действия до момента, о котором идёт речь</em>.<br><br><strong>Почему не другие:</strong><br>• «knew · told» — Past Simple: не подчёркивает, что это было <em>раньше</em>.<br>• «have known · have told» — Present Perfect: не сочетается с рассказом в прошлом.",
+      () => scenes.scene16()
+    );
+  });
+});
+
+scene('scene15_calm', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "There is silence on the line. You hear a faint sound — like a lighter flicking. A slow exhale.",
+    {who: "Dean", text: "You sound just like your parents. Courteous even when the world is ending."},
+    {who: "Dean", text: "Alright. Listen to me. Your mom and dad are tough — and might be alive. But if they've been gone for four days, we don't have a second to waste."},
+    {who: "Dean", text: "Where are you right now? Still at your parents' place?"},
+    {who: "You", text: "No. I crossed the street. I'm on your porch. Your old house. The light was on. The radio was playing inside. Nobody answered."},
+    "You hear his movement freeze. Complete silence.",
+    {who: "Dean", text: "Our porch? Son of a bitch. Listen to me very carefully."},
+    {who: "Dean", text: "Get off that porch right now. Don't look back. Don't check the windows. Walk straight to your car. Lock the doors. Keep the engine running."},
+    {who: "Dean", text: "I need to know — did you smell anything weird out there? Like sulfur or rotten eggs?"}
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Present Perfect — результат сейчас):<br><br>You <span class='blank'>___</span> the street and now you <span class='blank'>___</span> on his porch.",
+      ["have crossed · are", "crossed · were", "cross · are"],
+      0,
+      "<strong>have crossed · are</strong> — Present Perfect + Present Simple: <em>результат в настоящем</em> (перешёл → и вот ты здесь).<br><br><strong>Почему не другие:</strong><br>• «crossed · were» — Past Simple: не подчёркивает, что результат <em>важен сейчас</em>.<br>• «cross · are» — Present Simple в первой части: неверно, действие <em>уже завершено</em>.",
+      () => scenes.scene16()
+    );
+  });
+});
+
+scene('scene15_aggressive', function() {
+  setBg('winchester_house_2.jpg');
+  showText([
+    "There is a moment of complete silence. Then — a sharp, bitter laugh that sounds more like a growl.",
+    {who: "Dean", text: "You sound angry. You should be. But right now, your anger is useless."},
+    {who: "Dean", text: "You want answers about the photo? You want a lecture on ancient symbols? Man, I want to give them to you."},
+    {who: "Dean", text: "But I'm going to be honest — we don't have time to explain years of secrets right now, and frankly, you don't have the stomach for it yet."},
+    {who: "Dean", text: "Your mom and dad might still be breathing. But their lives are being threatened by something you can't even imagine."},
+    {who: "Dean", text: "If you keep wasting minutes shouting at me, they will die."},
+    {who: "Dean", text: "So here's the deal. Shut up. Push your panic down. And do exactly what I tell you to stay alive for the next hour."},
+    {who: "Dean", text: "You can either hang up and handle it yourself, or you can listen. So what's it gonna be? You going to listen?"},
+    {who: "You", text: "I'm listening. But I'm on your porch right now. The light was on inside."},
+    "You hear him curse under his breath. His tone turns ice-cold.",
+    {who: "Dean", text: "Our porch? Damn it. Drop the attitude and move. Get off that porch. Get into your car. Lock the doors. Keep the engine running. Tell me you're moving. Now."}
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Past Simple vs Past Continuous):<br><br>While he <span class='blank'>___</span>, you <span class='blank'>___</span> at him about the photo.",
+      ["was talking · were shouting", "talked · shouted", "has talked · have shouted"],
+      0,
+      "<strong>was talking · were shouting</strong> — Past Continuous: <em>два длительных действия одновременно</em>.<br><br><strong>Почему не другие:</strong><br>• «talked · shouted» — Past Simple: не подчёркивает одновременность.<br>• «has talked · have shouted» — Present Perfect: не сочетается с рассказом в прошлом.",
+      () => scenes.scene16()
+    );
+  });
+});
+
+
+
+
+// ===== СЦЕНА 16: ПРИКАЗ — BRANCHING POINT 3 =====
+scene('scene16', function() {
+  setBg('car_interior.jpg');
+  showText([
+    "You're inside your car now. Doors locked. Engine purring softly.",
+    "Through the windshield, the Winchesters' old house looks like a ghost — lit windows, no movement inside.",
+    "Dean's voice is still in your ear. Sharp. Focused. He's about to give you the final order.",
+    "But first — you have to show him you can handle it."
+  ], () => {
+    showChoices("What do you tell him?", [
+      { text: "\"Okay, okay, I'm in the car! I locked it. What now? Should I stay here? What if that black van comes back? My hands are shaking, Dean.\"", action: () => { changeStat('fear', 2); scenes.scene16_breakdown(); } },
+      { text: "\"I'm secure. Doors locked, engine running. I didn't smell sulfur. I have my father's notebook with me — it says 'Djinn' with a hand-drawn symbol. There's a motel on Highway 40. Should I head there, or meet you on the road?\"", action: () => { changeStat('logic', 2); scenes.scene16_tactical(); } },
+      { text: "\"No way. I'm not sitting here like bait while you cruise down the highway. I have my father's gun. I'm driving back to my parents' house to look for more clues, whether you like it or not.\"", action: () => { changeStat('rage', 2); scenes.scene16_defiant(); } }
+    ]);
+  });
+});
+
+scene('scene16_breakdown', function() {
+  setBg('car_interior.jpg');
+  showText([
+    "Your voice is high and thin. The words trip over each other. You can hear yourself babbling.",
+    "On the other end of the line, Dean curses. You hear a heavy slap against his steering wheel.",
+    {who: "Dean", text: "Hey! Shut up and listen to me!"},
+    "His voice slams through your panic like a brick wall.",
+    {who: "Dean", text: "Get your act together. You are Thomas and Sarah's blood. Start acting like it."},
+    {who: "Dean", text: "You are going to put the car in drive. You are going to leave Ravenwood. Right now."},
+    {who: "Dean", text: "Drive east on Route 9. Don't stop for gas. Don't stop for anything. Twenty miles out, there's an old, abandoned Texaco station. Pull in there. Kill the headlights. Wait for a black Impala."},
+    {who: "Dean", text: "Do you copy me? Tell me you copy!"},
+    {who: "You", text: "I copy."},
+    {who: "Dean", text: "Good. I'm at least three or four hours away. Hold on. Don't die."},
+    "The line goes dead. You put your foot on the gas."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Future — will / going to):<br><br>You <span class='blank'>___</span> the car in drive and <span class='blank'>___</span> out of Ravenwood.",
+      ["are going to put · are going to drive", "put · drive", "were putting · were driving"],
+      0,
+      "<strong>are going to put · are going to drive</strong> — Future with «going to»: <em>план, решение, намерение</em>.<br><br><strong>Почему не другие:</strong><br>• «put · drive» — Present Simple: не передаёт будущее намерение.<br>• «were putting · were driving» — Past Continuous: это план на будущее, а не прошлое.",
+      () => scenes.episode2_placeholder()
+    );
+  });
+});
+
+scene('scene16_tactical', function() {
+  setBg('car_interior.jpg');
+  showText([
+    "There's a brief pause. You hear the deep growl of the Impala's engine as Dean shifts gears.",
+    {who: "Dean", text: "Your dad's notebook? And it says 'Djinn'? Son of a bitch. Thomas did know his stuff. He was always ten steps ahead of everyone."},
+    "His tone shifts — from protective to professional.",
+    {who: "Dean", text: "Forget the motel. If that van belongs to what I think it does, a motel is just a box with no exits. We keep moving."},
+    {who: "Dean", text: "Listen. Get out of Ravenwood now. Hit Route 9 and drive east. Don't push the speed limit — you don't want a local cop pulling you over tonight."},
+    {who: "Dean", text: "Exactly twenty miles out, there's an abandoned Texaco station. Pull behind the main building. Kill the lights. Wait."},
+    {who: "Dean", text: "I'm tracking your signal. If anything follows you, hit the horn and don't stop hitting it."},
+    {who: "Dean", text: "It's going to take me three to four hours. Just stay alive. See you there."},
+    "The line clicks off. You check your mirrors. Drop the clutch. Pull away from the curb.",
+    "Your mind is completely focused on the mission."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (Future — will for prediction):<br><br>It <span class='blank'>___</span> you three or four hours to get here. I <span class='blank'>___</span> your signal the whole time.",
+      ["will take · will track", "takes · track", "took · tracked"],
+      0,
+      "<strong>will take · will track</strong> — Future with «will»: <em>предсказание, обещание</em>.<br><br><strong>Почему не другие:</strong><br>• «takes · track» — Present Simple: не передаёт будущее.<br>• «took · tracked» — Past Simple: это про будущее, а не про прошлое.",
+      () => scenes.episode2_placeholder()
+    );
+  });
+});
+
+scene('scene16_defiant', function() {
+  setBg('car_interior.jpg');
+  showText([
+    "Dean's reaction is immediate. Deadly cold.",
+    {who: "Dean", text: "You think you're a badass because you found a handgun in a closet?"},
+    {who: "Dean", text: "Listen to me, you stubborn piece of work. The thing that took your parents eats bullets for breakfast."},
+    {who: "Dean", text: "You go back into that house with a gun you don't know how to use, and you won't last five minutes."},
+    {who: "Dean", text: "Then I have to find your parents and dig your grave. I'm not doing both tonight."},
+    "He pauses. You hear him take a heavy breath. When he speaks again, his voice is quieter — but harder.",
+    {who: "Dean", text: "You want to fight? Fine. But you fight with me, not against me."},
+    {who: "Dean", text: "Put the car in drive. Get out of that town. Drive east on Route 9. Twenty miles out, there's a broken-down Texaco station. Pull in. Hide the car behind the garage. Wait for me."},
+    {who: "Dean", text: "You try to play the hero before I get there, and I swear I'll leave you to the monsters. Are we clear?"},
+    {who: "You", text: "Clear."},
+    {who: "Dean", text: "Good. Three to four hours."},
+    "The line goes dead. You glare at the phone. Your teeth are clenched.",
+    "But he's right. You put the car in gear. You hit the accelerator."
+  ], () => {
+    showExercise(
+      "Choose the correct sentence (First Conditional — реальное условие):<br><br>If you <span class='blank'>___</span> back to the house, you <span class='blank'>___</span> five minutes.",
+      ["go · won't last", "went · didn't last", "have gone · haven't lasted"],
+      0,
+      "<strong>go · won't last</strong> — First Conditional: <em>If + Present Simple, will + verb</em> — реальное условие в будущем.<br><br><strong>Почему не другие:</strong><br>• «went · didn't last» — Second Conditional (Past) — гипотетическая ситуация, не реальная угроза.<br>• «have gone · haven't lasted» — Present Perfect: не подходит для условного предложения.",
+      () => scenes.episode2_placeholder()
+    );
+  });
+});
+
+// ===== ПЛЕЙСХОЛДЕР ДЛЯ ЭПИЗОДА 2 =====
+scene('episode2_placeholder', function() {
+  setBg('on_the_road.jpg');
+  showText([
+    "You're on the road. Route 9. Dark. Empty. The stars are enormous.",
+    "Twenty miles out, you see the sign: TEXACO — CLOSED.",
+    "You pull behind the old building. Kill the headlights. Kill the engine.",
+    "The wait begins.",
+    "You open your bag. The journal. The photo. The knife. The salt.",
+    "You take out a pen and a piece of paper. And you start to write.",
+    "You write everything. Every detail. Every feeling. Every fear.",
+    "Because that's what your father did.",
+    
+  ], () => {
+    document.getElementById('text-box').innerHTML = '<span style="color:#b8860b;font-size:24px;">🩸 TO BE CONTINUED 🩸</span><br><br>Fear: ' + state.fear + ' · Logic: ' + state.logic + ' · Rage: ' + state.rage + '<br><br><em>Episode 2: The Impala — coming next.</em><br><br><button onclick="startNew()" style="background:#b8860b;color:#000;border:none;padding:14px 34px;font-size:18px;border-radius:6px;cursor:pointer;margin-top:10px;">🩸 Start Over</button>';
+    document.getElementById('text-box').style.display = 'block';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('hint').style.display = 'none';
+    state.currentSceneName = 'episode2_placeholder';
+    saveGame();
+  });
+});
+
+
+// ===== МУЗЫКА =====
+const bgMusic = document.getElementById('bg-music');
+const musicToggle = document.getElementById('music-toggle');
+let musicPlaying = false;
+
+function toggleMusic() {
+  if (musicPlaying) {
+    bgMusic.pause();
+    musicToggle.textContent = '🔇';
+    musicPlaying = false;
+  } else {
+    bgMusic.play();
+    musicToggle.textContent = '🎵';
+    musicPlaying = true;
+  }
+}
+
+
+
+</script>
+
+</body>
+</html>
